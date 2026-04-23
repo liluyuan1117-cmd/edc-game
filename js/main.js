@@ -1583,6 +1583,9 @@ document.addEventListener('DOMContentLoaded', () => {
     createSquishyParticles();
     initRatchetRing();
     initFidgetChain();
+    initFidgetCube();
+    initFidgetCoin();
+    initBreatheStone();
     updateStats();
     applySkin();
     
@@ -1594,8 +1597,159 @@ document.addEventListener('DOMContentLoaded', () => {
 function clearAllCache() {
     localStorage.clear();
     sessionStorage.clear();
-    alert('✅ 缓存已清除！页面将刷新，捏捏球应该有 6 种形态了！');
+    alert('✅ 缓存已清除！页面将刷新！');
     window.location.href = window.location.pathname + '?clear=1';
+}
+
+// ========== 解压骰子 ==========
+function initFidgetCube() {
+    const cube = document.getElementById('fidget-cube');
+    const counterEl = document.getElementById('cube-interactions');
+    if (!cube) return;
+    
+    let interactions = 0;
+    
+    // 点击按钮面
+    const clicker = cube.querySelector('.cube-clicker');
+    if (clicker) {
+        clicker.addEventListener('click', () => {
+            interactions++;
+            if (counterEl) counterEl.textContent = interactions.toLocaleString();
+            audioContext.playPop(1);
+            if (navigator.vibrate && gameState.hapticEnabled) navigator.vibrate(15);
+        });
+    }
+    
+    // 开关面
+    const switchEl = cube.querySelector('.cube-switch');
+    if (switchEl) {
+        switchEl.addEventListener('click', () => {
+            switchEl.classList.toggle('active');
+            interactions++;
+            if (counterEl) counterEl.textContent = interactions.toLocaleString();
+            audioContext.playClick();
+            if (navigator.vibrate && gameState.hapticEnabled) navigator.vibrate(20);
+        });
+    }
+    
+    // 摇杆面
+    const joystick = cube.querySelector('.cube-joystick');
+    if (joystick) {
+        joystick.addEventListener('click', () => {
+            interactions++;
+            if (counterEl) counterEl.textContent = interactions.toLocaleString();
+            audioContext.playClick();
+        });
+    }
+    
+    // 旋转 dial 面
+    const dial = cube.querySelector('.cube-dial');
+    if (dial) {
+        let dialRotation = 0;
+        dial.addEventListener('click', () => {
+            dialRotation += 45;
+            dial.style.transform = `rotate(${dialRotation}deg)`;
+            interactions++;
+            if (counterEl) counterEl.textContent = interactions.toLocaleString();
+            audioContext.playClick();
+        });
+    }
+    
+    // 齿轮面
+    const gears = cube.querySelector('.cube-gears');
+    if (gears) {
+        gears.addEventListener('click', () => {
+            interactions++;
+            if (counterEl) counterEl.textContent = interactions.toLocaleString();
+            audioContext.playClick();
+        });
+    }
+    
+    // 呼吸面
+    const breathe = cube.querySelector('.cube-breathe');
+    if (breathe) {
+        breathe.addEventListener('click', () => {
+            interactions++;
+            if (counterEl) counterEl.textContent = interactions.toLocaleString();
+            audioContext.playSquishRelease();
+        });
+    }
+}
+
+// ========== 磁力硬币 ==========
+function initFidgetCoin() {
+    const coin = document.getElementById('fidget-coin');
+    const counterEl = document.getElementById('coin-spins');
+    if (!coin) return;
+    
+    let spins = 0;
+    let isSpinning = false;
+    
+    coin.addEventListener('click', () => {
+        if (isSpinning) return;
+        isSpinning = true;
+        
+        coin.classList.add('spinning');
+        spins++;
+        if (counterEl) counterEl.textContent = spins.toLocaleString();
+        
+        // 旋转音效
+        audioContext.playSpinner(1);
+        
+        setTimeout(() => {
+            coin.classList.remove('spinning');
+            isSpinning = false;
+        }, 2000);
+    });
+}
+
+// ========== 呼吸石 ==========
+function initBreatheStone() {
+    const stone = document.getElementById('breathe-stone');
+    const guide = document.getElementById('breathe-guide');
+    const counterEl = document.getElementById('breathe-cycles');
+    if (!stone) return;
+    
+    let cycles = 0;
+    let isTouching = false;
+    let breathPhase = 'inhale'; // inhale or exhale
+    
+    // 呼吸引导
+    function updateBreathText() {
+        if (guide) {
+            guide.querySelector('.breathe-text').textContent = breathPhase === 'inhale' ? '吸' : '呼';
+        }
+    }
+    
+    // 4 秒呼吸循环
+    setInterval(() => {
+        breathPhase = breathPhase === 'inhale' ? 'exhale' : 'inhale';
+        updateBreathText();
+    }, 2000);
+    
+    stone.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        isTouching = true;
+        stone.style.transform = 'scale(0.95)';
+    });
+    
+    stone.addEventListener('pointerup', (e) => {
+        e.preventDefault();
+        if (isTouching) {
+            isTouching = false;
+            stone.style.transform = 'scale(1)';
+            cycles++;
+            if (counterEl) counterEl.textContent = cycles.toLocaleString();
+            audioContext.playSquishRelease();
+        }
+    });
+    
+    stone.addEventListener('pointerleave', () => {
+        if (isTouching) {
+            isTouching = false;
+            stone.style.transform = 'scale(1)';
+        }
+    });
 }
 
 // 页面关闭前保存
