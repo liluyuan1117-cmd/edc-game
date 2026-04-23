@@ -33,7 +33,8 @@ const achievements = [
     { id: 'pop_100', name: '泡泡大师', desc: '按压 100 次泡泡', icon: '👑', condition: () => gameState.totalPops >= 100 },
     { id: 'spin_1', name: '旋转开始', desc: '第一次旋转陀螺', icon: '🌀', condition: () => gameState.totalSpins >= 1 },
     { id: 'spin_25', name: '旋转高手', desc: '旋转 25 次陀螺', icon: '💫', condition: () => gameState.totalSpins >= 25 },
-    { id: 'combo_50', name: '专注时刻', desc: '单次会话按压 50 次', icon: '🔥', condition: () => gameState.sessionPops >= 50 }
+    { id: 'spin_100', name: '陀螺大师', desc: '旋转 100 次陀螺', icon: '🏆', condition: () => gameState.totalSpins >= 100 },
+    { id: 'combo_50', name: '专注时刻', desc: '单次会话 50 次', icon: '🔥', condition: () => (gameState.sessionPops + gameState.sessionSpins) >= 50 }
 ];
 
 function checkAchievements() {
@@ -114,12 +115,12 @@ const audioContext = {
         const gain = this.ctx.createGain();
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-        osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+        osc.frequency.setValueAtTime(200 + Math.random() * 100, this.ctx.currentTime);
         osc.type = 'triangle';
-        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
         osc.start(this.ctx.currentTime);
-        osc.stop(this.ctx.currentTime + 0.2);
+        osc.stop(this.ctx.currentTime + 0.15);
     },
     playClick() {
         if (!gameState.soundEnabled) return;
@@ -130,10 +131,25 @@ const audioContext = {
         gain.connect(this.ctx.destination);
         osc.frequency.setValueAtTime(1000, this.ctx.currentTime);
         osc.type = 'square';
-        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
         osc.start(this.ctx.currentTime);
         osc.stop(this.ctx.currentTime + 0.05);
+    },
+    playSquish() {
+        if (!gameState.soundEnabled) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.15);
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+        osc.start(this.ctx.currentTime);
+        osc.stop(this.ctx.currentTime + 0.15);
     }
 };
 
@@ -143,14 +159,14 @@ function createParticles(x, y, color = '#ff6b6b') {
     for (let i = 0; i < 8; i++) {
         const particle = document.createElement('div');
         particle.className = 'pop-bubble particle';
-        particle.style.left = x + 'px';
-        particle.style.top = y + 'px';
+        particle.style.left = (x - rect.left) + 'px';
+        particle.style.top = (y - rect.top) + 'px';
         particle.style.width = (6 + Math.random() * 8) + 'px';
         particle.style.height = particle.style.width;
         particle.style.background = color;
         
         const angle = (i / 8) * Math.PI * 2;
-        const distance = 50 + Math.random() * 50;
+        const distance = 40 + Math.random() * 40;
         particle.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
         particle.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
         
@@ -160,50 +176,56 @@ function createParticles(x, y, color = '#ff6b6b') {
 }
 
 // ========== 玩具切换 ==========
+function switchToy(toyId) {
+    document.querySelectorAll('.toy-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.toy === toyId);
+    });
+    document.querySelectorAll('.toy-container').forEach(c => {
+        c.classList.toggle('active', c.id === toyId);
+    });
+}
+
 document.querySelectorAll('.toy-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const toyId = btn.dataset.toy;
         if (btn.disabled) return;
         
         audioContext.playClick();
-        
-        document.querySelectorAll('.toy-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.toy-container').forEach(c => c.classList.remove('active'));
-        document.getElementById(toyId).classList.add('active');
+        switchToy(toyId);
     });
 });
 
 // ========== 设置面板 ==========
+const settingsPanel = document.createElement('div');
+settingsPanel.className = 'settings-panel';
 const settingsBtn = document.createElement('button');
 settingsBtn.className = 'settings-btn';
 settingsBtn.innerHTML = '⚙️';
-settingsBtn.onclick = toggleSettings;
-document.querySelector('.settings-panel')?.appendChild(settingsBtn) || createSettingsPanel();
+settingsPanel.appendChild(settingsBtn);
+document.querySelector('.container').insertBefore(settingsPanel, document.querySelector('.header'));
 
-function createSettingsPanel() {
-    const panel = document.createElement('div');
-    panel.className = 'settings-panel';
-    panel.appendChild(settingsBtn);
-    document.querySelector('.header').after(panel);
-}
+let settingsOpen = false;
 
-function toggleSettings() {
-    const modal = document.getElementById('settings-modal');
-    const overlay = document.getElementById('settings-overlay');
-    if (modal && overlay) {
-        modal.classList.toggle('show');
-        overlay.classList.toggle('show');
+settingsBtn.addEventListener('click', () => {
+    if (settingsOpen) {
+        document.getElementById('settings-modal')?.remove();
+        document.getElementById('settings-overlay')?.remove();
+        settingsOpen = false;
     } else {
         createSettingsModal();
+        settingsOpen = true;
     }
-}
+});
 
 function createSettingsModal() {
     const overlay = document.createElement('div');
     overlay.id = 'settings-overlay';
     overlay.className = 'overlay';
-    overlay.onclick = toggleSettings;
+    overlay.onclick = () => {
+        overlay.remove();
+        document.getElementById('settings-modal')?.remove();
+        settingsOpen = false;
+    };
     
     const modal = document.createElement('div');
     modal.id = 'settings-modal';
@@ -235,8 +257,6 @@ function createSettingsModal() {
     
     document.body.appendChild(overlay);
     document.body.appendChild(modal);
-    modal.classList.add('show');
-    overlay.classList.add('show');
     
     document.getElementById('sound-toggle').onchange = (e) => {
         gameState.soundEnabled = e.target.checked;
@@ -255,82 +275,180 @@ function createSettingsModal() {
     };
 }
 
-// ========== 指尖陀螺 ==========
+// ========== 指尖陀螺 - 真实物理模拟 ==========
 let currentRotation = 0;
 let rotationVelocity = 0;
+let maxVelocity = 50;
+let friction = 0.985;
 let isSpinning = false;
 let lastTime = 0;
+let spinCount = 0;
 const spinner = document.getElementById('fidget-spinner');
+const spinnerSpeedLines = document.querySelector('.spinner-speed-lines');
+
+// 创建速度线
+function createSpeedLines() {
+    const container = document.createElement('div');
+    container.className = 'spinner-speed-lines';
+    for (let i = 0; i < 8; i++) {
+        const line = document.createElement('div');
+        line.className = 'speed-line';
+        container.appendChild(line);
+    }
+    spinner.appendChild(container);
+}
+createSpeedLines();
 
 function animateSpinner(timestamp) {
     if (!lastTime) lastTime = timestamp;
+    const deltaTime = timestamp - lastTime;
     lastTime = timestamp;
+    
     currentRotation += rotationVelocity;
     spinner.style.transform = `rotate(${currentRotation}deg)`;
-    rotationVelocity *= 0.985;
-    if (Math.abs(rotationVelocity) > 0.1) {
+    
+    // 根据速度调整摩擦力（高速时更持久）
+    const dynamicFriction = rotationVelocity > 30 ? 0.992 : 0.985;
+    rotationVelocity *= dynamicFriction;
+    
+    // 速度线动画
+    const speedLines = document.querySelector('.spinner-speed-lines');
+    if (speedLines) {
+        speedLines.style.transform = `translate(-50%, -50%) rotate(${currentRotation}deg)`;
+    }
+    
+    // 根据速度调整音效
+    if (rotationVelocity > 5 && gameState.soundEnabled && Math.random() < 0.02) {
+        audioContext.playSpin();
+    }
+    
+    if (Math.abs(rotationVelocity) > 0.5) {
         requestAnimationFrame(animateSpinner);
     } else {
         isSpinning = false;
         rotationVelocity = 0;
+        spinner.classList.remove('spinning');
     }
 }
 
-function spinSpinner(velocity = 15) {
+function addSpinVelocity(velocity) {
+    // 每次点击都叠加速度，可以越转越快
+    rotationVelocity += velocity;
+    
+    // 限制最大速度
+    if (rotationVelocity > maxVelocity) {
+        rotationVelocity = maxVelocity;
+    }
+    
     if (!isSpinning) {
         isSpinning = true;
         lastTime = 0;
-        rotationVelocity = velocity;
+        spinner.classList.add('spinning');
+        spinCount++;
         gameState.totalSpins++;
         gameState.sessionSpins++;
         updateStats();
-        audioContext.playSpin();
-        requestAnimationFrame(animateSpinner);
         checkAchievements();
+        requestAnimationFrame(animateSpinner);
+    }
+    
+    // 播放音效
+    audioContext.playSpin();
+    
+    // 触觉反馈
+    if (navigator.vibrate && gameState.hapticEnabled) {
+        navigator.vibrate(15);
     }
 }
 
-spinner.addEventListener('click', (e) => {
+// 点击陀螺任意位置都能加速
+spinner.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
     const rect = spinner.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
-    const distanceFromCenter = Math.abs(e.clientX - centerX);
-    const velocity = 10 + (distanceFromCenter / rect.width) * 20;
-    spinSpinner(velocity);
+    const centerY = rect.top + rect.height / 2;
+    
+    // 计算点击位置距离中心的距离
+    const distanceX = e.clientX - centerX;
+    const distanceY = e.clientY - centerY;
+    const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+    
+    // 距离中心越远，力矩越大，速度增加越多
+    const maxDistance = rect.width / 2;
+    const leverage = Math.min(distance / maxDistance, 1);
+    
+    // 基础速度 + 杠杆效应
+    const velocity = 5 + leverage * 15;
+    
+    // 判断点击方向，决定顺时针还是逆时针
+    const angle = Math.atan2(distanceY, distanceX);
+    const direction = Math.sin(angle) > 0 ? 1 : -1;
+    
+    addSpinVelocity(velocity * direction);
 });
 
-let startX = 0, startTime = 0;
-spinner.addEventListener('mousedown', (e) => { startX = e.clientX; startTime = Date.now(); });
-spinner.addEventListener('mouseup', (e) => {
-    const diff = e.clientX - startX;
+// 滑动支持
+let startX = 0, startY = 0, startTime = 0;
+
+spinner.addEventListener('pointerdown', (e) => {
+    startX = e.clientX;
+    startY = e.clientY;
+    startTime = Date.now();
+});
+
+spinner.addEventListener('pointerup', (e) => {
+    const diffX = e.clientX - startX;
+    const diffY = e.clientY - startY;
     const duration = Date.now() - startTime;
-    if (Math.abs(diff) > 20 && duration < 300) {
-        spinSpinner(Math.min(Math.abs(diff) / duration * 10, 30));
+    
+    // 检测滑动手势
+    if (Math.abs(diffX) > 30 || Math.abs(diffY) > 30) {
+        if (duration < 400) {
+            const velocity = Math.min(Math.sqrt(diffX * diffX + diffY * diffY) / duration * 15, 25);
+            const direction = diffX > 0 ? 1 : -1;
+            addSpinVelocity(velocity * direction);
+        }
     }
 });
-spinner.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startTime = Date.now(); }, { passive: true });
-spinner.addEventListener('touchend', (e) => {
-    const diff = e.changedTouches[0].clientX - startX;
-    const duration = Date.now() - startTime;
-    if (Math.abs(diff) > 20 && duration < 300) {
-        spinSpinner(Math.min(Math.abs(diff) / duration * 10, 30));
+
+spinner.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (e.touches.length > 0) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        startTime = Date.now();
     }
-}, { passive: true });
+}, { passive: false });
+
+spinner.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    const diffX = touch.clientX - startX;
+    const diffY = touch.clientY - startY;
+    const duration = Date.now() - startTime;
+    
+    if (Math.abs(diffX) > 30 || Math.abs(diffY) > 30) {
+        if (duration < 400) {
+            const velocity = Math.min(Math.sqrt(diffX * diffX + diffY * diffY) / duration * 15, 25);
+            const direction = diffX > 0 ? 1 : -1;
+            addSpinVelocity(velocity * direction);
+        }
+    }
+}, { passive: false });
 
 // ========== 按压泡泡 ==========
 const popitBoard = document.getElementById('popit-board');
 const popitReset = document.getElementById('popit-reset');
 
 function createPopitBoard() {
+    if (!popitBoard) return;
     popitBoard.innerHTML = '';
     for (let i = 0; i < 25; i++) {
         const bubble = document.createElement('div');
         bubble.className = 'pop-bubble';
-        bubble.addEventListener('click', (e) => popBubble(bubble, e));
-        bubble.addEventListener('touchstart', (e) => { 
-            e.preventDefault(); 
-            const touch = e.touches[0];
-            const rect = bubble.getBoundingClientRect();
-            popBubble(bubble, { clientX: rect.left + rect.width/2, clientY: rect.top + rect.height/2 });
+        bubble.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            popBubble(bubble, e);
         });
         popitBoard.appendChild(bubble);
     }
@@ -356,13 +474,15 @@ function popBubble(bubble, e) {
     }
 }
 
-popitReset.addEventListener('click', () => {
-    document.querySelectorAll('.pop-bubble').forEach(b => b.classList.remove('popped'));
-    audioContext.playReset();
-    if (navigator.vibrate && gameState.hapticEnabled) {
-        navigator.vibrate([50, 30, 50]);
-    }
-});
+if (popitReset) {
+    popitReset.addEventListener('click', () => {
+        document.querySelectorAll('.pop-bubble').forEach(b => b.classList.remove('popped'));
+        audioContext.playReset();
+        if (navigator.vibrate && gameState.hapticEnabled) {
+            navigator.vibrate([50, 30, 50]);
+        }
+    });
+}
 
 // ========== 磁力滑块 ==========
 const sliderTop = document.getElementById('slider-top');
@@ -374,7 +494,7 @@ let sliderClicks = 0;
 let isDragging = false;
 let dragStartX = 0;
 let dragStartPosition = 0;
-const maxSlide = 80;
+const maxSlide = 70;
 const snapPoints = [-maxSlide, -maxSlide/2, 0, maxSlide/2, maxSlide];
 
 function snapToNearest(value) {
@@ -384,8 +504,8 @@ function snapToNearest(value) {
 }
 
 function updateSliderPosition() {
-    sliderTop.style.transform = `translateX(${sliderPosition}px)`;
-    sliderBottom.style.transform = `translateX(${-sliderPosition}px)`;
+    if (sliderTop) sliderTop.style.transform = `translateX(${sliderPosition}px)`;
+    if (sliderBottom) sliderBottom.style.transform = `translateX(${-sliderPosition}px)`;
 }
 
 function playSliderClick() {
@@ -401,74 +521,40 @@ function playSliderClick() {
     checkAchievements();
 }
 
-sliderTop.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    dragStartX = e.clientX;
-    dragStartPosition = sliderPosition;
-    sliderTop.style.cursor = 'grabbing';
-});
+if (sliderTop && sliderBottom) {
+    sliderTop.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        dragStartX = e.clientX;
+        dragStartPosition = sliderPosition;
+    });
 
-sliderBottom.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    dragStartX = e.clientX;
-    dragStartPosition = sliderPosition;
-    sliderTop.style.cursor = 'grabbing';
-});
+    sliderBottom.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        dragStartX = e.clientX;
+        dragStartPosition = sliderPosition;
+    });
 
-document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    const deltaX = e.clientX - dragStartX;
-    let newPosition = dragStartPosition + deltaX * 0.5;
-    newPosition = Math.max(-maxSlide - 20, Math.min(maxSlide + 20, newPosition));
-    sliderPosition = newPosition;
-    updateSliderPosition();
-});
+    document.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const deltaX = e.clientX - dragStartX;
+        let newPosition = dragStartPosition + deltaX * 0.5;
+        newPosition = Math.max(-maxSlide - 20, Math.min(maxSlide + 20, newPosition));
+        sliderPosition = newPosition;
+        updateSliderPosition();
+    });
 
-document.addEventListener('mouseup', () => {
-    if (!isDragging) return;
-    isDragging = false;
-    sliderTop.style.cursor = 'grab';
-    
-    const snapped = snapToNearest(sliderPosition);
-    if (Math.abs(snapped - sliderPosition) > 5) {
-        playSliderClick();
-    }
-    sliderPosition = snapped;
-    updateSliderPosition();
-});
-
-// 触摸支持
-sliderTop.addEventListener('touchstart', (e) => {
-    isDragging = true;
-    dragStartX = e.touches[0].clientX;
-    dragStartPosition = sliderPosition;
-}, { passive: true });
-
-sliderBottom.addEventListener('touchstart', (e) => {
-    isDragging = true;
-    dragStartX = e.touches[0].clientX;
-    dragStartPosition = sliderPosition;
-}, { passive: true });
-
-document.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-    const deltaX = e.touches[0].clientX - dragStartX;
-    let newPosition = dragStartPosition + deltaX * 0.5;
-    newPosition = Math.max(-maxSlide - 20, Math.min(maxSlide + 20, newPosition));
-    sliderPosition = newPosition;
-    updateSliderPosition();
-}, { passive: true });
-
-document.addEventListener('touchend', () => {
-    if (!isDragging) return;
-    isDragging = false;
-    const snapped = snapToNearest(sliderPosition);
-    if (Math.abs(snapped - sliderPosition) > 5) {
-        playSliderClick();
-    }
-    sliderPosition = snapped;
-    updateSliderPosition();
-});
+    document.addEventListener('pointerup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        const snapped = snapToNearest(sliderPosition);
+        if (Math.abs(snapped - sliderPosition) > 5) {
+            playSliderClick();
+        }
+        sliderPosition = snapped;
+        updateSliderPosition();
+    });
+}
 
 // ========== 无限魔方 ==========
 const infinityCube = document.getElementById('infinity-cube');
@@ -490,6 +576,7 @@ function playFoldSound() {
 }
 
 function animateCubeFold(cubeIndex) {
+    if (!infinityCube) return;
     const cube = infinityCube.querySelector(`.cube-${cubeIndex}`);
     if (!cube) return;
     
@@ -502,16 +589,18 @@ function animateCubeFold(cubeIndex) {
     }, 400);
 }
 
-infinityCube.addEventListener('click', (e) => {
-    const face = e.target.closest('.face');
-    if (!face) return;
-    
-    const cube = face.closest('.mini-cube');
-    const cubeIndex = parseInt(cube.className.split('cube-')[1]);
-    
-    animateCubeFold(cubeIndex);
-    playFoldSound();
-});
+if (infinityCube) {
+    infinityCube.addEventListener('click', (e) => {
+        const face = e.target.closest('.face');
+        if (!face) return;
+        
+        const cube = face.closest('.mini-cube');
+        const cubeIndex = parseInt(cube.className.split('cube-')[1]);
+        
+        animateCubeFold(cubeIndex);
+        playFoldSound();
+    });
+}
 
 // ========== 磁力捏捏球 ==========
 const squishyBall = document.getElementById('squishy-ball');
@@ -538,48 +627,43 @@ function createSquishyParticles() {
     }
 }
 
-function playSquishSound() {
-    if (!gameState.soundEnabled) return;
-    audioContext.init();
-    const osc = audioContext.ctx.createOscillator();
-    const gain = audioContext.ctx.createGain();
-    osc.connect(gain);
-    gain.connect(audioContext.ctx.destination);
-    osc.frequency.setValueAtTime(200, audioContext.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(100, audioContext.ctx.currentTime + 0.15);
-    osc.type = 'sine';
-    gain.gain.setValueAtTime(0.2, audioContext.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.ctx.currentTime + 0.15);
-    osc.start(audioContext.ctx.currentTime);
-    osc.stop(audioContext.ctx.currentTime + 0.15);
-}
+if (squishyBall) {
+    squishyBall.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (isSqueezing) return;
+        isSqueezing = true;
+        squishyBall.classList.add('squeezing');
+        audioContext.playSquish();
+        if (navigator.vibrate && gameState.hapticEnabled) {
+            navigator.vibrate(30);
+        }
+    });
 
-function startSqueeze() {
-    if (isSqueezing) return;
-    isSqueezing = true;
-    squishyBall.classList.add('squeezing');
-    playSquishSound();
-    if (navigator.vibrate && gameState.hapticEnabled) {
-        navigator.vibrate(30);
-    }
-}
+    squishyBall.addEventListener('pointerup', (e) => {
+        e.preventDefault();
+        if (!isSqueezing) return;
+        isSqueezing = false;
+        squishyBall.classList.remove('squeezing');
+        squeezeCount++;
+        gameState.totalPops++;
+        gameState.sessionPops++;
+        if (squishySqueezesEl) squishySqueezesEl.textContent = squeezeCount.toLocaleString();
+        updateStats();
+        checkAchievements();
+    });
 
-function endSqueeze() {
-    if (!isSqueezing) return;
-    isSqueezing = false;
-    squishyBall.classList.remove('squeezing');
-    squeezeCount++;
-    gameState.totalPops++;
-    gameState.sessionPops++;
-    if (squishySqueezesEl) squishySqueezesEl.textContent = squeezeCount.toLocaleString();
-    updateStats();
-    checkAchievements();
+    squishyBall.addEventListener('pointerleave', () => {
+        if (!isSqueezing) return;
+        isSqueezing = false;
+        squishyBall.classList.remove('squeezing');
+        squeezeCount++;
+        gameState.totalPops++;
+        gameState.sessionPops++;
+        if (squishySqueezesEl) squishySqueezesEl.textContent = squeezeCount.toLocaleString();
+        updateStats();
+        checkAchievements();
+    });
 }
-
-squishyBall.addEventListener('mousedown', startSqueeze);
-squishyBall.addEventListener('touchstart', (e) => { e.preventDefault(); startSqueeze(); }, { passive: false });
-document.addEventListener('mouseup', endSqueeze);
-document.addEventListener('touchend', endSqueeze);
 
 // ========== 初始化 ==========
 document.addEventListener('DOMContentLoaded', () => {

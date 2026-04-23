@@ -6,6 +6,8 @@
     <title>今天真的压力山大 - EDC 解压游戏</title>
     <meta name="description" content="在线 EDC 解压玩具模拟器，指尖陀螺、按压泡泡，随时随地放松解压">
     <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -53,13 +55,18 @@
             <div id="spinner" class="toy-container active">
                 <div class="spinner-wrapper">
                     <div class="spinner" id="fidget-spinner">
-                        <div class="spinner-center"></div>
-                        <div class="spinner-arm arm-1"></div>
-                        <div class="spinner-arm arm-2"></div>
-                        <div class="spinner-arm arm-3"></div>
+                        <div class="spinner-bearing"></div>
+                        <div class="spinner-body">
+                            <div class="spinner-arm arm-1"></div>
+                            <div class="spinner-arm arm-2"></div>
+                            <div class="spinner-arm arm-3"></div>
+                            <div class="spinner-weight weight-1"></div>
+                            <div class="spinner-weight weight-2"></div>
+                            <div class="spinner-weight weight-3"></div>
+                        </div>
                     </div>
                 </div>
-                <p class="hint">点击或滑动旋转陀螺 🌀</p>
+                <p class="hint">点击或滑动任意位置加速 🌀</p>
             </div>
 
             <!-- 按压泡泡 -->
@@ -99,7 +106,6 @@
             <div id="infinity" class="toy-container">
                 <div class="infinity-wrapper">
                     <div class="infinity-cube" id="infinity-cube">
-                        <!-- 8 个小立方体 -->
                         <div class="mini-cube cube-0"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
                         <div class="mini-cube cube-1"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
                         <div class="mini-cube cube-2"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
@@ -133,9 +139,9 @@
 
         <!-- 底部 -->
         <footer class="footer">
-            <p>MVP 版本 | 更多玩具开发中...</p>
-            <p style="margin-top: 10px; font-size: 0.8rem; opacity: 0.7;">
-                Made with ❤️ for stressed humans everywhere
+            <p>MVP 版本 | 5 款玩具已上线</p>
+            <p style="margin-top: 8px; font-size: 0.75rem; opacity: 0.7;">
+                Made with ❤️ for stressed humans
             </p>
         </footer>
     </div>
