@@ -38,7 +38,10 @@ const toySkins = {
     squishy: [
         { id: 'lava', name: '🌋 熔岩流沙', premium: false },
         { id: 'galaxy', name: '🌌 星空银河', premium: false },
-        { id: 'jelly', name: '🍮 渐变果冻', premium: false }
+        { id: 'jelly', name: '🍮 渐变果冻', premium: false },
+        { id: 'jade', name: '💚 翡翠玉石', premium: false },
+        { id: 'amethyst', name: '💜 紫晶洞', premium: false },
+        { id: 'choco', name: '🍫 巧克力', premium: false }
     ]
 };
 
@@ -235,7 +238,7 @@ function updateStats() {
     if (sessionEl) sessionEl.textContent = (gameState.sessionPops + gameState.sessionSpins).toLocaleString();
 }
 
-// ========== 音效系统 - 真实 ASMR 级音效 ==========
+// ========== 音效系统 - 真实 ASMR 级多層音效 ==========
 const audioContext = {
     ctx: null,
     init() {
@@ -244,95 +247,142 @@ const audioContext = {
         }
     },
     
-    // 🌀 指尖陀螺音效 - 轴承旋转 + 空气切割声
+    // 🌀 指尖陀螺音效 - 4 层合成
     playSpinner(velocity = 1) {
         if (!gameState.soundEnabled) return;
         this.init();
-        
         const now = this.ctx.currentTime;
         
-        // 低频轴承声
+        // 层 1: 低频轴承旋转声
         const osc1 = this.ctx.createOscillator();
         const gain1 = this.ctx.createGain();
         osc1.connect(gain1);
         gain1.connect(this.ctx.destination);
-        osc1.frequency.setValueAtTime(80 + velocity * 30, now);
+        osc1.frequency.setValueAtTime(60 + velocity * 25, now);
+        osc1.frequency.exponentialRampToValueAtTime(40 + velocity * 15, now + 0.3);
         osc1.type = 'triangle';
-        gain1.gain.setValueAtTime(0.12 * velocity, now);
-        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        gain1.gain.setValueAtTime(0.15 * velocity, now);
+        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
         osc1.start(now);
-        osc1.stop(now + 0.3);
+        osc1.stop(now + 0.4);
         
-        // 高频空气切割声（高速时）
-        if (velocity > 0.8) {
-            const osc2 = this.ctx.createOscillator();
-            const gain2 = this.ctx.createGain();
-            osc2.connect(gain2);
-            gain2.connect(this.ctx.destination);
-            osc2.frequency.setValueAtTime(2000 + velocity * 500, now);
-            osc2.type = 'sine';
-            gain2.gain.setValueAtTime(0.03 * velocity, now);
-            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-            osc2.start(now);
-            osc2.stop(now + 0.15);
-        }
+        // 层 2: 中频轴承滚珠声
+        const osc2 = this.ctx.createOscillator();
+        const gain2 = this.ctx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(this.ctx.destination);
+        osc2.frequency.setValueAtTime(300 + velocity * 100, now);
+        osc2.type = 'sine';
+        gain2.gain.setValueAtTime(0.08 * velocity, now);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc2.start(now);
+        osc2.stop(now + 0.2);
         
-        // 金属轴承质感（机械音效包）
-        if (gameState.soundPack === 'mechanical') {
+        // 层 3: 高频空气切割声（高速时）
+        if (velocity > 0.6) {
             const osc3 = this.ctx.createOscillator();
             const gain3 = this.ctx.createGain();
             osc3.connect(gain3);
             gain3.connect(this.ctx.destination);
-            osc3.frequency.setValueAtTime(1500, now);
-            osc3.type = 'square';
-            gain3.gain.setValueAtTime(0.05, now);
-            gain3.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+            osc3.frequency.setValueAtTime(1800 + velocity * 600, now);
+            osc3.frequency.exponentialRampToValueAtTime(1200 + velocity * 400, now + 0.15);
+            osc3.type = 'sine';
+            gain3.gain.setValueAtTime(0.04 * velocity, now);
+            gain3.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
             osc3.start(now);
-            osc3.stop(now + 0.08);
+            osc3.stop(now + 0.2);
+        }
+        
+        // 层 4: 金属轴承质感（机械音效包）
+        if (gameState.soundPack === 'mechanical') {
+            const osc4 = this.ctx.createOscillator();
+            const gain4 = this.ctx.createGain();
+            osc4.connect(gain4);
+            gain4.connect(this.ctx.destination);
+            osc4.frequency.setValueAtTime(1200, now);
+            osc4.type = 'square';
+            gain4.gain.setValueAtTime(0.06, now);
+            gain4.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc4.start(now);
+            osc4.stop(now + 0.1);
+        }
+        
+        // ASMR 包：添加更多高频细节
+        if (gameState.soundPack === 'asmr' && velocity > 0.5) {
+            const osc5 = this.ctx.createOscillator();
+            const gain5 = this.ctx.createGain();
+            osc5.connect(gain5);
+            gain5.connect(this.ctx.destination);
+            osc5.frequency.setValueAtTime(3000 + Math.random() * 1000, now);
+            osc5.type = 'triangle';
+            gain5.gain.setValueAtTime(0.02, now);
+            gain5.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            osc5.start(now);
+            osc5.stop(now + 0.25);
         }
     },
     
-    // 🔘 按压泡泡音效 - 橡胶 popping 声
+    // 🔘 按压泡泡音效 - 3 层合成 + 连击
     playPop(intensity = 1) {
         if (!gameState.soundEnabled) return;
         this.init();
         const now = this.ctx.currentTime;
         
-        // 基础 popping 声
+        // 层 1: 橡胶 popping 声（中低频）
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         
-        // 随机音高增加真实感
-        const baseFreq = 350 + Math.random() * 250 + intensity * 100;
+        const baseFreq = 320 + Math.random() * 280 + intensity * 120;
         osc.frequency.setValueAtTime(baseFreq, now);
-        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.5, now + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.45, now + 0.1);
         osc.type = 'sine';
         
-        // ASMR 模式：更丰富
         if (gameState.soundPack === 'asmr') {
-            gain.gain.setValueAtTime(0.45 * intensity, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            gain.gain.setValueAtTime(0.5 * intensity, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
         } else {
-            gain.gain.setValueAtTime(0.35 * intensity, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            gain.gain.setValueAtTime(0.4 * intensity, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
         }
         
         osc.start(now);
-        osc.stop(now + 0.12);
+        osc.stop(now + 0.15);
         
-        // 橡胶质感（高频点击）
+        // 层 2: 橡胶表面高频点击
         const clickOsc = this.ctx.createOscillator();
         const clickGain = this.ctx.createGain();
         clickOsc.connect(clickGain);
         clickGain.connect(this.ctx.destination);
-        clickOsc.frequency.setValueAtTime(1200 + Math.random() * 400, now);
+        clickOsc.frequency.setValueAtTime(1100 + Math.random() * 500, now);
         clickOsc.type = 'triangle';
-        clickGain.gain.setValueAtTime(0.15 * intensity, now);
-        clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        clickGain.gain.setValueAtTime(0.18 * intensity, now);
+        clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
         clickOsc.start(now);
-        clickOsc.stop(now + 0.05);
+        clickOsc.stop(now + 0.06);
+        
+        // 层 3: 气泡破裂感（ASMR 包）
+        if (gameState.soundPack === 'asmr') {
+            const noiseBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.1, this.ctx.sampleRate);
+            const noiseData = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < noiseData.length; i++) {
+                noiseData[i] = (Math.random() * 2 - 1) * 0.15;
+            }
+            const noise = this.ctx.createBufferSource();
+            noise.buffer = noiseBuffer;
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.value = 2000;
+            const noiseGain = this.ctx.createGain();
+            noiseGain.gain.setValueAtTime(0.2 * intensity, now);
+            noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            noise.connect(filter);
+            filter.connect(noiseGain);
+            noiseGain.connect(this.ctx.destination);
+            noise.start(now);
+            noise.stop(now + 0.1);
+        }
     },
     
     // 🔘 重置音效 - 刷刷声
@@ -490,77 +540,89 @@ const audioContext = {
         clickOsc.stop(now + 0.05);
     },
     
-    // 🔮 磁力捏捏球音效 - 挤压噗叽 + 颗粒流动 + 磁性咔嗒
+    // 🔮 磁力捏捏球音效 - 5 层超丰富合成
     playSquish(squeezeIntensity = 1) {
         if (!gameState.soundEnabled) return;
         this.init();
         const now = this.ctx.currentTime;
         
-        // 基础噗叽声（低频）
+        // 层 1: 低频噗叽声（湿润感）
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         
-        const baseFreq = 150 + squeezeIntensity * 50;
+        const baseFreq = 130 + squeezeIntensity * 60;
         osc.frequency.setValueAtTime(baseFreq, now);
-        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.5, now + 0.25);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.4, now + 0.3);
         
-        // ASMR 模式：更湿润
         if (gameState.soundPack === 'asmr') {
             osc.type = 'sine';
-            gain.gain.setValueAtTime(0.4 * squeezeIntensity, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            gain.gain.setValueAtTime(0.45 * squeezeIntensity, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
         } else {
             osc.type = 'sine';
-            gain.gain.setValueAtTime(0.3 * squeezeIntensity, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            gain.gain.setValueAtTime(0.35 * squeezeIntensity, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
         }
         
         osc.start(now);
-        osc.stop(now + 0.3);
+        osc.stop(now + 0.35);
         
-        // 颗粒流动"沙沙"声
-        if (this.squishyNoiseNode) {
-            this.squishyNoiseNode.stop();
-        }
-        const bufferSize = this.ctx.sampleRate * 0.5;
+        // 层 2: 颗粒流动"沙沙"声（白噪声）
+        const bufferSize = this.ctx.sampleRate * 0.4;
         const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
         const data = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) {
-            data[i] = (Math.random() * 2 - 1) * 0.3;
+            data[i] = (Math.random() * 2 - 1) * 0.25;
         }
         
-        this.squishyNoiseNode = this.ctx.createBufferSource();
-        this.squishyNoiseNode.buffer = buffer;
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
         
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'bandpass';
-        filter.frequency.value = 600;
+        filter.frequency.value = 500 + squeezeIntensity * 200;
+        filter.Q.value = 1.5;
         
-        const squishyGain = this.ctx.createGain();
-        squishyGain.gain.setValueAtTime(0.15 * squeezeIntensity, now);
-        squishyGain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        const noiseGain = this.ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.18 * squeezeIntensity, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
         
-        this.squishyNoiseNode.connect(filter);
-        filter.connect(squishyGain);
-        squishyGain.connect(this.ctx.destination);
-        this.squishyNoiseNode.start(now);
-        this.squishyNoiseNode.stop(now + 0.25);
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(this.ctx.destination);
+        noise.start(now);
+        noise.stop(now + 0.35);
         
-        // 磁性颗粒细微咔嗒（随机）
-        for (let i = 0; i < 3 + squeezeIntensity * 2; i++) {
-            const clickTime = now + (i * 0.05) + (Math.random() * 0.03);
+        // 层 3-5: 磁性颗粒细微咔嗒（随机 4-7 次）
+        const numClicks = Math.floor(4 + squeezeIntensity * 3 + Math.random() * 2);
+        for (let i = 0; i < numClicks; i++) {
+            const clickTime = now + (i * 0.04) + (Math.random() * 0.025);
             const clickOsc = this.ctx.createOscillator();
             const clickGain = this.ctx.createGain();
             clickOsc.connect(clickGain);
             clickGain.connect(this.ctx.destination);
-            clickOsc.frequency.setValueAtTime(800 + Math.random() * 400, clickTime);
+            clickOsc.frequency.setValueAtTime(700 + Math.random() * 500, clickTime);
             clickOsc.type = 'triangle';
-            clickGain.gain.setValueAtTime(0.05, clickTime);
-            clickGain.gain.exponentialRampToValueAtTime(0.01, clickTime + 0.03);
+            clickGain.gain.setValueAtTime(0.06, clickTime);
+            clickGain.gain.exponentialRampToValueAtTime(0.01, clickTime + 0.035);
             clickOsc.start(clickTime);
-            clickOsc.stop(clickTime + 0.03);
+            clickOsc.stop(clickTime + 0.035);
+        }
+        
+        // ASMR 包：添加更多高频细节
+        if (gameState.soundPack === 'asmr') {
+            const highOsc = this.ctx.createOscillator();
+            const highGain = this.ctx.createGain();
+            highOsc.connect(highGain);
+            highGain.connect(this.ctx.destination);
+            highOsc.frequency.setValueAtTime(2500 + Math.random() * 800, now);
+            highOsc.type = 'sine';
+            highGain.gain.setValueAtTime(0.03, now);
+            highGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            highOsc.start(now);
+            highOsc.stop(now + 0.2);
         }
     },
     
