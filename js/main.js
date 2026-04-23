@@ -1296,15 +1296,17 @@ if (squishyBall) {
 }
 
 // ========== 棘轮戒指 ==========
-const ratchetRing = document.getElementById('ring-outer');
-const ratchetClicksEl = document.getElementById('ratchet-clicks');
-let ratchetRotation = 0;
-let ratchetClicks = 0;
-let ratchetMode = 'one-way'; // 'one-way' or 'two-way'
-let ratchetVelocity = 0;
-let lastRatchetClick = 0;
-
-if (ratchetRing) {
+function initRatchetRing() {
+    const ratchetRing = document.getElementById('ring-outer');
+    const ratchetClicksEl = document.getElementById('ratchet-clicks');
+    if (!ratchetRing) return;
+    
+    let ratchetRotation = 0;
+    let ratchetClicks = 0;
+    let ratchetMode = 'one-way';
+    let ratchetVelocity = 0;
+    let lastRatchetClick = 0;
+    
     // 模式切换
     document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1335,11 +1337,9 @@ if (ratchetRing) {
         const currentAngle = getAngle(e.clientX, e.clientY);
         let deltaAngle = currentAngle - startAngle;
         
-        // 处理角度环绕
         if (deltaAngle > 180) deltaAngle -= 360;
         if (deltaAngle < -180) deltaAngle += 360;
         
-        // 检测咔嗒（每 15 度一次）
         const clickThreshold = 15;
         const now = Date.now();
         
@@ -1368,9 +1368,9 @@ if (ratchetRing) {
         ratchetRing.style.transform = `rotate(${ratchetRotation * 15}deg)`;
     });
     
-    ratchetRing.addEventListener('pointerup', () => {
+    ratchetRing.addEventListener('pointerup', (e) => {
         isRotating = false;
-        ratchetRing.releasePointerCapture(event.pointerId);
+        try { ratchetRing.releasePointerCapture(e.pointerId); } catch(err) {}
     });
     
     ratchetRing.addEventListener('pointercancel', () => {
@@ -1379,59 +1379,60 @@ if (ratchetRing) {
 }
 
 // ========== 磁力链 ==========
-const fidgetChain = document.getElementById('fidget-chain');
-const chainClacksEl = document.getElementById('chain-clacks');
-let chainClacks = 0;
-let chainSegments = [];
-
-function createChainSegments() {
+function initFidgetChain() {
+    const fidgetChain = document.getElementById('fidget-chain');
+    const chainClacksEl = document.getElementById('chain-clacks');
     if (!fidgetChain) return;
-    fidgetChain.innerHTML = '';
-    chainSegments = [];
     
-    for (let i = 0; i < 8; i++) {
-        const segment = document.createElement('div');
-        segment.className = 'chain-segment';
-        segment.style.transform = `translate(-50%, -50%) rotate(${i * 20 - 70}deg) translateY(${i * 8}px)`;
-        segment.dataset.index = i;
+    let chainClacks = 0;
+    let chainSegments = [];
+    
+    function createChainSegments() {
+        fidgetChain.innerHTML = '';
+        chainSegments = [];
         
-        segment.addEventListener('click', () => {
-            animateChainSegment(segment);
-            playChainClack();
-        });
-        
-        fidgetChain.appendChild(segment);
-        chainSegments.push(segment);
-    }
-}
-
-function animateChainSegment(segment) {
-    const index = parseInt(segment.dataset.index);
-    segment.style.transform = `translate(-50%, -50%) rotate(${index * 20 - 70 + 30}deg) translateY(${index * 8 + 10}px)`;
-    
-    setTimeout(() => {
-        segment.style.transform = `translate(-50%, -50%) rotate(${index * 20 - 70}deg) translateY(${index * 8}px)`;
-    }, 150);
-}
-
-function playChainClack() {
-    chainClacks++;
-    gameState.totalSpins++;
-    gameState.sessionSpins++;
-    if (chainClacksEl) chainClacksEl.textContent = chainClacks.toLocaleString();
-    updateStats();
-    
-    audioContext.playChainClack(1);
-    
-    if (navigator.vibrate && gameState.hapticEnabled) {
-        navigator.vibrate(20);
+        for (let i = 0; i < 8; i++) {
+            const segment = document.createElement('div');
+            segment.className = 'chain-segment';
+            segment.style.transform = `translate(-50%, -50%) rotate(${i * 20 - 70}deg) translateY(${i * 8}px)`;
+            segment.dataset.index = i;
+            
+            segment.addEventListener('pointerdown', () => {
+                animateChainSegment(segment);
+                playChainClack();
+            });
+            
+            fidgetChain.appendChild(segment);
+            chainSegments.push(segment);
+        }
     }
     
-    checkAchievements();
-}
-
-// 甩动链条
-if (fidgetChain) {
+    function animateChainSegment(segment) {
+        const index = parseInt(segment.dataset.index);
+        segment.style.transform = `translate(-50%, -50%) rotate(${index * 20 - 70 + 30}deg) translateY(${index * 8 + 10}px)`;
+        
+        setTimeout(() => {
+            segment.style.transform = `translate(-50%, -50%) rotate(${index * 20 - 70}deg) translateY(${index * 8}px)`;
+        }, 150);
+    }
+    
+    function playChainClack() {
+        chainClacks++;
+        gameState.totalSpins++;
+        gameState.sessionSpins++;
+        if (chainClacksEl) chainClacksEl.textContent = chainClacks.toLocaleString();
+        updateStats();
+        
+        audioContext.playChainClack(1);
+        
+        if (navigator.vibrate && gameState.hapticEnabled) {
+            navigator.vibrate(20);
+        }
+        
+        checkAchievements();
+    }
+    
+    // 甩动链条
     let lastX = 0, lastY = 0, lastTime = 0;
     
     fidgetChain.addEventListener('pointermove', (e) => {
@@ -1453,6 +1454,8 @@ if (fidgetChain) {
         lastY = e.clientY;
         lastTime = now;
     });
+    
+    createChainSegments();
 }
 
 // ========== 初始化 ==========
@@ -1460,7 +1463,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadState();
     createPopitBoard();
     createSquishyParticles();
-    createChainSegments();
+    initRatchetRing();
+    initFidgetChain();
     updateStats();
     applySkin();
     
