@@ -1626,6 +1626,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initFidgetCube();
     initFidgetCoin();
     initBreatheStone();
+    initFlippyChain();
+    initMiniJoystick();
     updateStats();
     applySkin();
     
@@ -1716,30 +1718,126 @@ function initFidgetCube() {
     }
 }
 
-// ========== 磁力硬币 ==========
-function initFidgetCoin() {
-    const coin = document.getElementById('fidget-coin');
-    const counterEl = document.getElementById('coin-spins');
-    if (!coin) return;
+// ========== 翻转链条 ==========
+function initFlippyChain() {
+    const chain = document.getElementById('flippy-chain');
+    const counterEl = document.getElementById('flippy-flips');
+    if (!chain) return;
     
-    let spins = 0;
-    let isSpinning = false;
+    let flips = 0;
+    const links = chain.querySelectorAll('.chain-link');
     
-    coin.addEventListener('click', () => {
-        if (isSpinning) return;
-        isSpinning = true;
+    // 初始化链节
+    links.forEach((link, i) => {
+        link.style.cssText = `
+            width: 50px;
+            height: 12px;
+            background: linear-gradient(90deg, #666, #888, #666);
+            border-radius: 6px;
+            margin: 4px 0;
+            cursor: pointer;
+            transition: transform 0.2s;
+        `;
         
-        coin.classList.add('spinning');
-        spins++;
-        if (counterEl) counterEl.textContent = spins.toLocaleString();
+        link.addEventListener('click', () => {
+            link.style.transform = 'rotate(180deg)';
+            flips++;
+            if (counterEl) counterEl.textContent = flips.toLocaleString();
+            audioContext.playChainClack(1);
+            setTimeout(() => link.style.transform = 'rotate(0deg)', 200);
+        });
+    });
+    
+    // 甩动检测
+    let lastX = 0, lastY = 0, lastTime = 0;
+    
+    chain.addEventListener('pointermove', (e) => {
+        const now = Date.now();
+        if (now - lastTime < 200) return;
         
-        // 旋转音效
-        audioContext.playSpinner(1);
+        const deltaX = e.clientX - lastX;
+        const deltaY = e.clientY - lastY;
+        const velocity = Math.sqrt(deltaX * deltaX + deltaY * deltaY) / (now - lastTime + 1);
         
-        setTimeout(() => {
-            coin.classList.remove('spinning');
-            isSpinning = false;
-        }, 2000);
+        if (velocity > 1.5) {
+            links.forEach((link, i) => {
+                if (Math.random() > 0.5) {
+                    setTimeout(() => {
+                        link.style.transform = `rotate(${180 + Math.random() * 180}deg)`;
+                        setTimeout(() => link.style.transform = 'rotate(0deg)', 150);
+                    }, i * 50);
+                }
+            });
+            flips++;
+            if (counterEl) counterEl.textContent = flips.toLocaleString();
+            audioContext.playChainClack(1);
+        }
+        
+        lastX = e.clientX;
+        lastY = e.clientY;
+        lastTime = now;
+    });
+}
+
+// ========== 迷你摇杆 ==========
+function initMiniJoystick() {
+    const joystick = document.getElementById('mini-joystick');
+    const stick = document.getElementById('joystick-stick');
+    const counterEl = document.getElementById('joystick-moves');
+    if (!joystick || !stick) return;
+    
+    let moves = 0;
+    let isDragging = false;
+    const maxDistance = 30;
+    
+    function moveStick(x, y) {
+        stick.style.transform = `translate(${x}px, ${y}px)`;
+    }
+    
+    function resetStick() {
+        stick.style.transform = 'translate(0px, 0px)';
+    }
+    
+    joystick.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        const rect = joystick.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const deltaX = e.clientX - centerX;
+        const deltaY = e.clientY - centerY;
+        const distance = Math.min(Math.sqrt(deltaX * deltaX + deltaY * deltaY), maxDistance);
+        const angle = Math.atan2(deltaY, deltaX);
+        
+        moveStick(
+            Math.cos(angle) * distance,
+            Math.sin(angle) * distance
+        );
+        
+        moves++;
+        if (counterEl) counterEl.textContent = moves.toLocaleString();
+        audioContext.playClick();
+    });
+    
+    document.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const rect = joystick.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const deltaX = e.clientX - centerX;
+        const deltaY = e.clientY - centerY;
+        const distance = Math.min(Math.sqrt(deltaX * deltaX + deltaY * deltaY), maxDistance);
+        const angle = Math.atan2(deltaY, deltaX);
+        
+        moveStick(
+            Math.cos(angle) * distance,
+            Math.sin(angle) * distance
+        );
+    });
+    
+    document.addEventListener('pointerup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        resetStick();
     });
 }
 

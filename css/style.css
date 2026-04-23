@@ -884,6 +884,63 @@ body {
     opacity: 0.8;
 }
 
+/* ========== 翻转链条 ========== */
+.flippy-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 280px;
+}
+
+.flippy-chain {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ========== 迷你摇杆 ========== */
+.joystick-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 280px;
+}
+
+.mini-joystick {
+    width: 120px;
+    height: 120px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+    border-radius: 12px;
+    position: relative;
+}
+
+.joystick-base {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.2), transparent);
+}
+
+.joystick-stick {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, var(--accent-primary), var(--accent-secondary));
+    box-shadow: 0 4px 12px var(--accent-glow);
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
 /* ========== 计数器 ========== */
 .slider-counter {
     margin-top: 16px;
