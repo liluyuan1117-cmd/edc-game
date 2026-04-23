@@ -36,14 +36,14 @@
             <button class="toy-btn" data-toy="popit">
                 <span class="emoji">🔘</span>按压泡泡
             </button>
-            <button class="toy-btn" data-toy="keyboard" disabled>
-                <span class="emoji">⌨️</span>机械键盘
+            <button class="toy-btn" data-toy="slider">
+                <span class="emoji">🔲</span>磁力滑块
             </button>
-            <button class="toy-btn" data-toy="switch" disabled>
-                <span class="emoji">🔧</span>无限开关
+            <button class="toy-btn" data-toy="infinity">
+                <span class="emoji">🎲</span>无限魔方
             </button>
-            <button class="toy-btn" data-toy="squishy" disabled>
-                <span class="emoji">🎱</span>捏捏乐
+            <button class="toy-btn" data-toy="squishy">
+                <span class="emoji">🔮</span>磁力捏捏球
             </button>
         </nav>
 
@@ -69,26 +69,64 @@
                 <button class="reset-btn" id="popit-reset">🔄 全部重置</button>
             </div>
 
-            <!-- 其他玩具占位 -->
-            <div id="keyboard" class="toy-container">
-                <div class="toy-placeholder">
-                    <div class="emoji">⌨️</div>
-                    <p>机械键盘开发中...</p>
-                    <small>青轴/红轴/茶轴音效即将上线</small>
+            <!-- 磁力滑块 -->
+            <div id="slider" class="toy-container">
+                <div class="slider-wrapper">
+                    <div class="slider-track" id="slider-track">
+                        <div class="slider-plate slider-top" id="slider-top">
+                            <div class="slider-magnets">
+                                <div class="magnet"></div>
+                                <div class="magnet"></div>
+                                <div class="magnet"></div>
+                            </div>
+                        </div>
+                        <div class="slider-plate slider-bottom" id="slider-bottom">
+                            <div class="slider-magnets">
+                                <div class="magnet"></div>
+                                <div class="magnet"></div>
+                                <div class="magnet"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="hint">左右滑动，感受磁力咔嗒声 🔲</p>
+                <div class="slider-counter">
+                    <span>咔嗒次数：</span><span id="slider-clicks">0</span>
                 </div>
             </div>
-            <div id="switch" class="toy-container">
-                <div class="toy-placeholder">
-                    <div class="emoji">🔧</div>
-                    <p>无限开关开发中...</p>
-                    <small>咔嗒咔嗒停不下来</small>
+
+            <!-- 无限魔方 -->
+            <div id="infinity" class="toy-container">
+                <div class="infinity-wrapper">
+                    <div class="infinity-cube" id="infinity-cube">
+                        <!-- 8 个小立方体 -->
+                        <div class="mini-cube cube-0"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+                        <div class="mini-cube cube-1"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+                        <div class="mini-cube cube-2"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+                        <div class="mini-cube cube-3"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+                        <div class="mini-cube cube-4"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+                        <div class="mini-cube cube-5"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+                        <div class="mini-cube cube-6"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+                        <div class="mini-cube cube-7"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+                    </div>
+                </div>
+                <p class="hint">点击魔方任意面进行折叠 🎲</p>
+                <div class="slider-counter">
+                    <span>折叠次数：</span><span id="infinity-folds">0</span>
                 </div>
             </div>
+
+            <!-- 磁力捏捏球 -->
             <div id="squishy" class="toy-container">
-                <div class="toy-placeholder">
-                    <div class="emoji">🎱</div>
-                    <p>捏捏乐开发中...</p>
-                    <small>软糯 Q 弹超治愈</small>
+                <div class="squishy-wrapper">
+                    <div class="squishy-ball" id="squishy-ball">
+                        <div class="squishy-core"></div>
+                        <div class="squishy-particles" id="squishy-particles"></div>
+                    </div>
+                </div>
+                <p class="hint">按住挤压，松开回弹 🔮</p>
+                <div class="slider-counter">
+                    <span>挤压次数：</span><span id="squishy-squeezes">0</span>
                 </div>
             </div>
         </main>

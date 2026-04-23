@@ -364,10 +364,228 @@ popitReset.addEventListener('click', () => {
     }
 });
 
+// ========== 磁力滑块 ==========
+const sliderTop = document.getElementById('slider-top');
+const sliderBottom = document.getElementById('slider-bottom');
+const sliderTrack = document.getElementById('slider-track');
+const sliderClicksEl = document.getElementById('slider-clicks');
+let sliderPosition = 0;
+let sliderClicks = 0;
+let isDragging = false;
+let dragStartX = 0;
+let dragStartPosition = 0;
+const maxSlide = 80;
+const snapPoints = [-maxSlide, -maxSlide/2, 0, maxSlide/2, maxSlide];
+
+function snapToNearest(value) {
+    return snapPoints.reduce((prev, curr) => 
+        Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+    );
+}
+
+function updateSliderPosition() {
+    sliderTop.style.transform = `translateX(${sliderPosition}px)`;
+    sliderBottom.style.transform = `translateX(${-sliderPosition}px)`;
+}
+
+function playSliderClick() {
+    audioContext.playClick();
+    sliderClicks++;
+    gameState.totalSpins++;
+    gameState.sessionSpins++;
+    if (sliderClicksEl) sliderClicksEl.textContent = sliderClicks.toLocaleString();
+    updateStats();
+    if (navigator.vibrate && gameState.hapticEnabled) {
+        navigator.vibrate(15);
+    }
+    checkAchievements();
+}
+
+sliderTop.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartPosition = sliderPosition;
+    sliderTop.style.cursor = 'grabbing';
+});
+
+sliderBottom.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartPosition = sliderPosition;
+    sliderTop.style.cursor = 'grabbing';
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - dragStartX;
+    let newPosition = dragStartPosition + deltaX * 0.5;
+    newPosition = Math.max(-maxSlide - 20, Math.min(maxSlide + 20, newPosition));
+    sliderPosition = newPosition;
+    updateSliderPosition();
+});
+
+document.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    sliderTop.style.cursor = 'grab';
+    
+    const snapped = snapToNearest(sliderPosition);
+    if (Math.abs(snapped - sliderPosition) > 5) {
+        playSliderClick();
+    }
+    sliderPosition = snapped;
+    updateSliderPosition();
+});
+
+// 触摸支持
+sliderTop.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    dragStartX = e.touches[0].clientX;
+    dragStartPosition = sliderPosition;
+}, { passive: true });
+
+sliderBottom.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    dragStartX = e.touches[0].clientX;
+    dragStartPosition = sliderPosition;
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const deltaX = e.touches[0].clientX - dragStartX;
+    let newPosition = dragStartPosition + deltaX * 0.5;
+    newPosition = Math.max(-maxSlide - 20, Math.min(maxSlide + 20, newPosition));
+    sliderPosition = newPosition;
+    updateSliderPosition();
+}, { passive: true });
+
+document.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    const snapped = snapToNearest(sliderPosition);
+    if (Math.abs(snapped - sliderPosition) > 5) {
+        playSliderClick();
+    }
+    sliderPosition = snapped;
+    updateSliderPosition();
+});
+
+// ========== 无限魔方 ==========
+const infinityCube = document.getElementById('infinity-cube');
+const infinityFoldsEl = document.getElementById('infinity-folds');
+let foldCount = 0;
+let cubeStates = [0, 0, 0, 0, 0, 0, 0, 0];
+
+function playFoldSound() {
+    audioContext.playClick();
+    foldCount++;
+    gameState.totalSpins++;
+    gameState.sessionSpins++;
+    if (infinityFoldsEl) infinityFoldsEl.textContent = foldCount.toLocaleString();
+    updateStats();
+    if (navigator.vibrate && gameState.hapticEnabled) {
+        navigator.vibrate(20);
+    }
+    checkAchievements();
+}
+
+function animateCubeFold(cubeIndex) {
+    const cube = infinityCube.querySelector(`.cube-${cubeIndex}`);
+    if (!cube) return;
+    
+    const rotation = cubeStates[cubeIndex] === 0 ? 90 : -90;
+    cube.style.transform = `rotateY(${rotation}deg) rotateX(${rotation}deg)`;
+    cubeStates[cubeIndex] = cubeStates[cubeIndex] === 0 ? 1 : 0;
+    
+    setTimeout(() => {
+        cube.style.transform = '';
+    }, 400);
+}
+
+infinityCube.addEventListener('click', (e) => {
+    const face = e.target.closest('.face');
+    if (!face) return;
+    
+    const cube = face.closest('.mini-cube');
+    const cubeIndex = parseInt(cube.className.split('cube-')[1]);
+    
+    animateCubeFold(cubeIndex);
+    playFoldSound();
+});
+
+// ========== 磁力捏捏球 ==========
+const squishyBall = document.getElementById('squishy-ball');
+const squishyParticles = document.getElementById('squishy-particles');
+const squishySqueezesEl = document.getElementById('squishy-squeezes');
+let squeezeCount = 0;
+let isSqueezing = false;
+
+function createSquishyParticles() {
+    if (!squishyParticles) return;
+    squishyParticles.innerHTML = '';
+    for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        const angle = (i / 20) * Math.PI * 2;
+        const radius = 30 + Math.random() * 40;
+        particle.style.left = (50 + Math.cos(angle) * radius) + '%';
+        particle.style.top = (50 + Math.sin(angle) * radius) + '%';
+        const tx = (Math.random() - 0.5) * 60;
+        const ty = (Math.random() - 0.5) * 60;
+        particle.style.setProperty('--tx', tx + 'px');
+        particle.style.setProperty('--ty', ty + 'px');
+        squishyParticles.appendChild(particle);
+    }
+}
+
+function playSquishSound() {
+    if (!gameState.soundEnabled) return;
+    audioContext.init();
+    const osc = audioContext.ctx.createOscillator();
+    const gain = audioContext.ctx.createGain();
+    osc.connect(gain);
+    gain.connect(audioContext.ctx.destination);
+    osc.frequency.setValueAtTime(200, audioContext.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, audioContext.ctx.currentTime + 0.15);
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.2, audioContext.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.ctx.currentTime + 0.15);
+    osc.start(audioContext.ctx.currentTime);
+    osc.stop(audioContext.ctx.currentTime + 0.15);
+}
+
+function startSqueeze() {
+    if (isSqueezing) return;
+    isSqueezing = true;
+    squishyBall.classList.add('squeezing');
+    playSquishSound();
+    if (navigator.vibrate && gameState.hapticEnabled) {
+        navigator.vibrate(30);
+    }
+}
+
+function endSqueeze() {
+    if (!isSqueezing) return;
+    isSqueezing = false;
+    squishyBall.classList.remove('squeezing');
+    squeezeCount++;
+    gameState.totalPops++;
+    gameState.sessionPops++;
+    if (squishySqueezesEl) squishySqueezesEl.textContent = squeezeCount.toLocaleString();
+    updateStats();
+    checkAchievements();
+}
+
+squishyBall.addEventListener('mousedown', startSqueeze);
+squishyBall.addEventListener('touchstart', (e) => { e.preventDefault(); startSqueeze(); }, { passive: false });
+document.addEventListener('mouseup', endSqueeze);
+document.addEventListener('touchend', endSqueeze);
+
 // ========== 初始化 ==========
 document.addEventListener('DOMContentLoaded', () => {
     loadState();
     createPopitBoard();
+    createSquishyParticles();
     updateStats();
     
     // 首次点击初始化 AudioContext
