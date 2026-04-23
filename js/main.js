@@ -1532,6 +1532,15 @@ function initFidgetChain() {
 
 // ========== 初始化 ==========
 document.addEventListener('DOMContentLoaded', () => {
+    // 检查是否需要清除缓存
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('clear') === '1') {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.history.replaceState({}, '', window.location.pathname);
+        alert('✅ 缓存已清除！');
+    }
+    
     loadState();
     createPopitBoard();
     createSquishyParticles();
@@ -1549,7 +1558,7 @@ function clearAllCache() {
     localStorage.clear();
     sessionStorage.clear();
     alert('✅ 缓存已清除！页面将刷新，捏捏球应该有 6 种形态了！');
-    location.reload();
+    window.location.href = window.location.pathname + '?clear=1';
 }
 
 // 页面关闭前保存
