@@ -16,32 +16,47 @@ const gameState = {
 // 玩具形态配置 - 全部免费体验
 const toySkins = {
     spinner: [
-        { id: 'classic', name: '🌀 三叶经典', premium: false },
-        { id: 'star', name: '⭐ 六叶星形', premium: false },
-        { id: 'yin-yang', name: '☯️ 太极阴阳', premium: false }
+        { id: 'classic', name: '三叶经典', premium: false },
+        { id: 'star', name: '六叶星形', premium: false },
+        { id: 'yin-yang', name: '太极阴阳', premium: false }
     ],
     popit: [
-        { id: 'rainbow', name: '🌈 彩虹渐变', premium: false },
-        { id: 'mono', name: '⚪ 单色极简', premium: false },
-        { id: 'glow', name: '✨ 夜光模式', premium: false }
+        { id: 'rainbow', name: '彩虹渐变', premium: false },
+        { id: 'mono', name: '单色极简', premium: false },
+        { id: 'glow', name: '夜光模式', premium: false }
     ],
     ratchet: [
-        { id: 'steel', name: '🔩 不锈钢', premium: false },
-        { id: 'titanium', name: '⚫ 钛合金', premium: false },
-        { id: 'gold', name: '🏆 镀金版', premium: false }
+        { id: 'steel', name: '不锈钢', premium: false },
+        { id: 'titanium', name: '钛合金', premium: false },
+        { id: 'gold', name: '镀金版', premium: false }
     ],
     chain: [
-        { id: 'silver', name: '⛓️ 银色链', premium: false },
-        { id: 'black', name: '🖤 黑色链', premium: false },
-        { id: 'rainbow', name: '🌈 彩虹链', premium: false }
+        { id: 'silver', name: '银色链', premium: false },
+        { id: 'black', name: '黑色链', premium: false },
+        { id: 'rainbow', name: '彩虹链', premium: false }
     ],
     squishy: [
-        { id: 'lava', name: '🌋 熔岩流沙', premium: false },
-        { id: 'galaxy', name: '🌌 星空银河', premium: false },
-        { id: 'jelly', name: '🍮 渐变果冻', premium: false },
-        { id: 'jade', name: '💚 翡翠玉石', premium: false },
-        { id: 'amethyst', name: '💜 紫晶洞', premium: false },
-        { id: 'choco', name: '🍫 巧克力', premium: false }
+        { id: 'lava', name: '熔岩流沙', premium: false },
+        { id: 'galaxy', name: '星空银河', premium: false },
+        { id: 'jelly', name: '渐变果冻', premium: false },
+        { id: 'jade', name: '翡翠玉石', premium: false },
+        { id: 'amethyst', name: '紫晶洞', premium: false },
+        { id: 'choco', name: '巧克力', premium: false }
+    ],
+    cube: [
+        { id: 'black', name: '经典黑', premium: false },
+        { id: 'blue', name: '深海蓝', premium: false },
+        { id: 'red', name: '火焰红', premium: false }
+    ],
+    coin: [
+        { id: 'silver', name: '银币', premium: false },
+        { id: 'gold', name: '金币', premium: false },
+        { id: 'copper', name: '铜币', premium: false }
+    ],
+    breathe: [
+        { id: 'stone', name: '原石', premium: false },
+        { id: 'jade', name: '玉石', premium: false },
+        { id: 'crystal', name: '水晶', premium: false }
     ]
 };
 
