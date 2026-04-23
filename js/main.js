@@ -744,9 +744,12 @@ function animateSpinner(timestamp) {
         speedLines.style.transform = `translate(-50%, -50%) rotate(${currentRotation}deg)`;
     }
     
+    // 更新速度指示器
+    updateSpeedIndicator(rotationVelocity);
+    
     // 根据速度调整音效
     if (rotationVelocity > 5 && gameState.soundEnabled && Math.random() < 0.02) {
-        audioContext.playSpin();
+        audioContext.playSpinner(Math.min(rotationVelocity / 20, 1.5));
     }
     
     if (Math.abs(rotationVelocity) > 0.5) {
@@ -755,7 +758,19 @@ function animateSpinner(timestamp) {
         isSpinning = false;
         rotationVelocity = 0;
         spinner.classList.remove('spinning');
+        // 清除速度指示器
+        const speedBars = document.querySelectorAll('.speed-bar');
+        speedBars.forEach(bar => bar.classList.remove('active'));
     }
+}
+
+// 速度指示器
+function updateSpeedIndicator(velocity) {
+    const speedBars = document.querySelectorAll('.speed-bar');
+    const activeBars = Math.min(Math.ceil(velocity / 10), 5);
+    speedBars.forEach((bar, i) => {
+        bar.classList.toggle('active', i < activeBars);
+    });
 }
 
 function addSpinVelocity(velocity) {
@@ -908,6 +923,9 @@ function popBubble(bubble, e) {
         const intensity = Math.min(0.5 + popCombo * 0.1, 1.5);
         audioContext.playPop(intensity);
         
+        // 更新连击显示
+        updateComboDisplay(popCombo);
+        
         if (navigator.vibrate && gameState.hapticEnabled) {
             navigator.vibrate(20 + popCombo * 5);
         }
@@ -917,6 +935,20 @@ function popBubble(bubble, e) {
         }
         
         checkAchievements();
+    }
+}
+
+// 连击显示
+function updateComboDisplay(combo) {
+    const display = document.getElementById('combo-display');
+    if (!display) return;
+    
+    if (combo > 1) {
+        display.textContent = `🔥 x${combo}`;
+        display.classList.add('show', 'pop');
+        setTimeout(() => display.classList.remove('pop'), 300);
+    } else {
+        display.classList.remove('show');
     }
 }
 
@@ -1096,6 +1128,12 @@ function updateSquishyDeformation() {
     const baseScale = isSqueezing ? 0.78 : 1 - currentDeformation * 0.15;
     const translateY = isSqueezing ? 10 : -currentDeformation * 5;
     squishyBall.style.transform = `scale(${baseScale}) translateY(${translateY}px)`;
+    
+    // 更新挤压指示器
+    const squeezeFill = document.getElementById('squeeze-fill');
+    if (squeezeFill) {
+        squeezeFill.style.width = (currentDeformation * 100) + '%';
+    }
     
     // 粒子流动效果
     const particles = squishyParticles?.querySelectorAll('.particle') || [];
