@@ -583,6 +583,71 @@ const audioContext = {
         osc.stop(now + 0.12);
     },
     
+    // 🔁 棘轮戒指音效 - 棘齿咔嗒声
+    playRatchetClick(velocity = 1) {
+        if (!gameState.soundEnabled) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        
+        // 棘齿咔嗒声（中频）
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.frequency.setValueAtTime(800 + Math.random() * 200, now);
+        osc.type = gameState.soundPack === 'mechanical' ? 'square' : 'triangle';
+        gain.gain.setValueAtTime(0.15 * velocity, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+        osc.start(now);
+        osc.stop(now + 0.04);
+        
+        // 金属旋转声（高频）
+        const metalOsc = this.ctx.createOscillator();
+        const metalGain = this.ctx.createGain();
+        metalOsc.connect(metalGain);
+        metalGain.connect(this.ctx.destination);
+        metalOsc.frequency.setValueAtTime(1500 + Math.random() * 500, now);
+        metalOsc.type = 'sine';
+        metalGain.gain.setValueAtTime(0.08 * velocity, now);
+        metalGain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+        metalOsc.start(now);
+        metalOsc.stop(now + 0.03);
+    },
+    
+    // ⛓️ 磁力链音效 - 金属链条碰撞声
+    playChainClack(velocity = 1) {
+        if (!gameState.soundEnabled) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        
+        // 金属碰撞声（高频随机）
+        for (let i = 0; i < 3 + Math.random() * 2; i++) {
+            const clickTime = now + (i * 0.03);
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.frequency.setValueAtTime(1200 + Math.random() * 800, clickTime);
+            osc.type = 'triangle';
+            gain.gain.setValueAtTime(0.12 * velocity, clickTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, clickTime + 0.05);
+            osc.start(clickTime);
+            osc.stop(clickTime + 0.05);
+        }
+        
+        // 磁力吸附声（低频）
+        const magOsc = this.ctx.createOscillator();
+        const magGain = this.ctx.createGain();
+        magOsc.connect(magGain);
+        magGain.connect(this.ctx.destination);
+        magOsc.frequency.setValueAtTime(200, now);
+        magOsc.type = 'sine';
+        magGain.gain.setValueAtTime(0.1 * velocity, now);
+        magGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        magOsc.start(now);
+        magOsc.stop(now + 0.08);
+    },
+    
     // ⚙️ 通用点击音效
     playClick() {
         if (!gameState.soundEnabled) return;
@@ -1230,11 +1295,172 @@ if (squishyBall) {
     updateSquishyDeformation();
 }
 
+// ========== 棘轮戒指 ==========
+const ratchetRing = document.getElementById('ring-outer');
+const ratchetClicksEl = document.getElementById('ratchet-clicks');
+let ratchetRotation = 0;
+let ratchetClicks = 0;
+let ratchetMode = 'one-way'; // 'one-way' or 'two-way'
+let ratchetVelocity = 0;
+let lastRatchetClick = 0;
+
+if (ratchetRing) {
+    // 模式切换
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            ratchetMode = btn.dataset.mode;
+        });
+    });
+    
+    let startAngle = 0;
+    let isRotating = false;
+    
+    function getAngle(x, y) {
+        const rect = ratchetRing.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        return Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
+    }
+    
+    ratchetRing.addEventListener('pointerdown', (e) => {
+        isRotating = true;
+        startAngle = getAngle(e.clientX, e.clientY);
+        ratchetRing.setPointerCapture(e.pointerId);
+    });
+    
+    ratchetRing.addEventListener('pointermove', (e) => {
+        if (!isRotating) return;
+        const currentAngle = getAngle(e.clientX, e.clientY);
+        let deltaAngle = currentAngle - startAngle;
+        
+        // 处理角度环绕
+        if (deltaAngle > 180) deltaAngle -= 360;
+        if (deltaAngle < -180) deltaAngle += 360;
+        
+        // 检测咔嗒（每 15 度一次）
+        const clickThreshold = 15;
+        const now = Date.now();
+        
+        if (Math.abs(deltaAngle) >= clickThreshold) {
+            const shouldClick = ratchetMode === 'two-way' || 
+                               (ratchetMode === 'one-way' && deltaAngle > 0);
+            
+            if (shouldClick && now - lastRatchetClick > 50) {
+                ratchetClicks++;
+                ratchetRotation += deltaAngle > 0 ? 1 : -1;
+                ratchetVelocity = Math.abs(deltaAngle) / 10;
+                
+                audioContext.playRatchetClick(Math.min(ratchetVelocity, 2));
+                
+                if (ratchetClicksEl) ratchetClicksEl.textContent = ratchetClicks.toLocaleString();
+                
+                if (navigator.vibrate && gameState.hapticEnabled) {
+                    navigator.vibrate(15);
+                }
+                
+                lastRatchetClick = now;
+                startAngle = currentAngle;
+            }
+        }
+        
+        ratchetRing.style.transform = `rotate(${ratchetRotation * 15}deg)`;
+    });
+    
+    ratchetRing.addEventListener('pointerup', () => {
+        isRotating = false;
+        ratchetRing.releasePointerCapture(event.pointerId);
+    });
+    
+    ratchetRing.addEventListener('pointercancel', () => {
+        isRotating = false;
+    });
+}
+
+// ========== 磁力链 ==========
+const fidgetChain = document.getElementById('fidget-chain');
+const chainClacksEl = document.getElementById('chain-clacks');
+let chainClacks = 0;
+let chainSegments = [];
+
+function createChainSegments() {
+    if (!fidgetChain) return;
+    fidgetChain.innerHTML = '';
+    chainSegments = [];
+    
+    for (let i = 0; i < 8; i++) {
+        const segment = document.createElement('div');
+        segment.className = 'chain-segment';
+        segment.style.transform = `translate(-50%, -50%) rotate(${i * 20 - 70}deg) translateY(${i * 8}px)`;
+        segment.dataset.index = i;
+        
+        segment.addEventListener('click', () => {
+            animateChainSegment(segment);
+            playChainClack();
+        });
+        
+        fidgetChain.appendChild(segment);
+        chainSegments.push(segment);
+    }
+}
+
+function animateChainSegment(segment) {
+    const index = parseInt(segment.dataset.index);
+    segment.style.transform = `translate(-50%, -50%) rotate(${index * 20 - 70 + 30}deg) translateY(${index * 8 + 10}px)`;
+    
+    setTimeout(() => {
+        segment.style.transform = `translate(-50%, -50%) rotate(${index * 20 - 70}deg) translateY(${index * 8}px)`;
+    }, 150);
+}
+
+function playChainClack() {
+    chainClacks++;
+    gameState.totalSpins++;
+    gameState.sessionSpins++;
+    if (chainClacksEl) chainClacksEl.textContent = chainClacks.toLocaleString();
+    updateStats();
+    
+    audioContext.playChainClack(1);
+    
+    if (navigator.vibrate && gameState.hapticEnabled) {
+        navigator.vibrate(20);
+    }
+    
+    checkAchievements();
+}
+
+// 甩动链条
+if (fidgetChain) {
+    let lastX = 0, lastY = 0, lastTime = 0;
+    
+    fidgetChain.addEventListener('pointermove', (e) => {
+        const now = Date.now();
+        const deltaX = e.clientX - lastX;
+        const deltaY = e.clientY - lastY;
+        const velocity = Math.sqrt(deltaX * deltaX + deltaY * deltaY) / (now - lastTime + 1);
+        
+        if (velocity > 2 && now - lastTime > 100) {
+            chainSegments.forEach((seg, i) => {
+                if (Math.random() > 0.5) {
+                    setTimeout(() => animateChainSegment(seg), i * 30);
+                }
+            });
+            playChainClack();
+        }
+        
+        lastX = e.clientX;
+        lastY = e.clientY;
+        lastTime = now;
+    });
+}
+
 // ========== 初始化 ==========
 document.addEventListener('DOMContentLoaded', () => {
     loadState();
     createPopitBoard();
     createSquishyParticles();
+    createChainSegments();
     updateStats();
     applySkin();
     
