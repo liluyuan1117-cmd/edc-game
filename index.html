@@ -5,63 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>今天真的压力山大 - EDC 解压游戏</title>
     <meta name="description" content="在线 EDC 解压玩具模拟器，指尖陀螺、按压泡泡，随时随地放松解压">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#1a1a2e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="stylesheet" href="css/style.css?v=2026042400">
+    <link rel="stylesheet" href="css/style.css?v=2026042401">
 </head>
 <body>
     <div class="container">
         <!-- 头部 -->
         <header class="header">
-            <h1>😤 今天真的压力山大</h1>
-            <p class="subtitle">玩点 EDC 玩具，放松一下～</p>
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 100 100" width="60" height="60">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+                    <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+                    <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" stroke-width="2" opacity="0.7"/>
+                    <circle cx="50" cy="50" r="8" fill="currentColor"/>
+                </svg>
+            </div>
+            <h1>今天真的压力山大</h1>
+            <p class="subtitle">在混沌中寻找秩序 · 在压力中寻回平静</p>
         </header>
 
         <!-- 统计栏 -->
         <div class="stats-bar">
             <div class="stat-item">
+                <svg class="stat-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M12 6v6l4 2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
                 <span class="stat-value" id="stat-total">0</span>
-                <span class="stat-label">总解压次数</span>
+                <span class="stat-label">总次数</span>
             </div>
             <div class="stat-item">
+                <svg class="stat-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
                 <span class="stat-value" id="stat-session">0</span>
-                <span class="stat-label">本次会话</span>
+                <span class="stat-label">本次</span>
             </div>
         </div>
 
         <!-- 玩具选择区 -->
         <nav class="toy-nav">
             <button class="toy-btn active" data-toy="spinner">
-                <span class="emoji">🌀</span>指尖陀螺
+                <svg class="toy-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <line x1="12" y1="2" x2="12" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="12" y1="18" x2="12" y2="22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="2" y1="12" x2="6" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="18" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>陀螺</span>
             </button>
             <button class="toy-btn" data-toy="popit">
-                <span class="emoji">🔘</span>按压泡泡
+                <svg class="toy-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <circle cx="6" cy="6" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="18" cy="6" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="18" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <span>泡泡</span>
             </button>
             <button class="toy-btn" data-toy="ratchet">
-                <span class="emoji">🔁</span>棘轮戒指
+                <svg class="toy-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M12 3v4M12 17v4M3 12h4M17 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>棘轮</span>
             </button>
             <button class="toy-btn" data-toy="chain">
-                <span class="emoji">⛓️</span>磁力链
+                <svg class="toy-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <rect x="4" y="4" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <rect x="14" y="14" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <line x1="10" y1="10" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>链条</span>
             </button>
             <button class="toy-btn" data-toy="squishy">
-                <span class="emoji">🔮</span>磁力捏捏球
+                <svg class="toy-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                </svg>
+                <span>捏捏</span>
             </button>
         </nav>
 
         <!-- EDC 玩具架 - 形态选择器 -->
         <div class="toy-shelf" id="toy-shelf">
-            <div class="shelf-label">🏷️ 当前玩具形态</div>
+            <div class="shelf-label">形态选择</div>
             <div class="shelf-options" id="shelf-options">
                 <!-- 动态生成 -->
             </div>
             <div class="sound-pack-selector">
-                <span class="sound-pack-label">🔊 音效包</span>
+                <span class="sound-pack-label">音效</span>
                 <select id="sound-pack-select" class="sound-pack-select">
-                    <option value="free">🆓 基础音效包</option>
-                    <option value="asmr">💎 ASMR 音效包</option>
-                    <option value="mechanical">⚙️ 机械轴音效包</option>
-                    <option value="nature">🌿 自然音效包</option>
+                    <option value="free">基础</option>
+                    <option value="asmr">ASMR</option>
+                    <option value="mechanical">机械</option>
+                    <option value="nature">自然</option>
                 </select>
             </div>
         </div>
@@ -93,15 +139,15 @@
                     <div class="speed-bar"></div>
                     <div class="speed-bar"></div>
                 </div>
-                <p class="hint">点击或滑动任意位置加速 🌀</p>
+                <p class="hint">点击或滑动加速</p>
             </div>
 
             <!-- 按压泡泡 -->
             <div id="popit" class="toy-container">
                 <div class="popit-board" id="popit-board"></div>
-                <div class="combo-display" id="combo-display">🔥 x0</div>
-                <p class="hint">点击泡泡，听啵啵声～ 🔘</p>
-                <button class="reset-btn" id="popit-reset">🔄 全部重置</button>
+                <div class="combo-display" id="combo-display">x0</div>
+                <p class="hint">点击泡泡</p>
+                <button class="reset-btn" id="popit-reset">重置</button>
             </div>
 
             <!-- 棘轮戒指 -->
@@ -119,12 +165,12 @@
                     </div>
                 </div>
                 <div class="ratchet-controls">
-                    <button class="mode-btn active" data-mode="one-way">单向棘轮</button>
-                    <button class="mode-btn" data-mode="two-way">双向棘轮</button>
+                    <button class="mode-btn active" data-mode="one-way">单向</button>
+                    <button class="mode-btn" data-mode="two-way">双向</button>
                 </div>
-                <p class="hint">点击或滑动旋转戒指 🔁</p>
+                <p class="hint">旋转戒指</p>
                 <div class="slider-counter">
-                    <span>咔嗒次数：</span><span id="ratchet-clicks">0</span>
+                    <span>次数：</span><span id="ratchet-clicks">0</span>
                 </div>
             </div>
 
@@ -135,9 +181,9 @@
                         <div class="chain-segment" id="chain-segments"></div>
                     </div>
                 </div>
-                <p class="hint">点击或甩动链条 ⛓️</p>
+                <p class="hint">点击或甩动</p>
                 <div class="slider-counter">
-                    <span>碰撞次数：</span><span id="chain-clacks">0</span>
+                    <span>次数：</span><span id="chain-clacks">0</span>
                 </div>
             </div>
 
@@ -152,27 +198,37 @@
                         </div>
                     </div>
                 </div>
-                <p class="hint">按住挤压，松开回弹 🔮</p>
+                <p class="hint">按住挤压</p>
                 <div class="slider-counter">
-                    <span>挤压次数：</span><span id="squishy-squeezes">0</span>
+                    <span>次数：</span><span id="squishy-squeezes">0</span>
                 </div>
             </div>
         </main>
 
         <!-- 底部 -->
         <footer class="footer">
-            <p>MVP 版本 | 5 款玩具已上线</p>
-            <p style="margin-top: 8px; font-size: 0.75rem; opacity: 0.7;">
-                Made with ❤️ for stressed humans
-            </p>
+            <p>MVP · 5 款玩具</p>
+            <p class="footer-tagline">在无序中创造有序</p>
         </footer>
         
         <!-- 清除缓存按钮 -->
         <button class="clear-cache-btn" onclick="clearAllCache()" title="清除缓存并刷新">
-            🗑️ 清除缓存
+            <svg viewBox="0 0 24 24" width="18" height="18">
+                <path d="M4 4l16 16M4 20L20 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
         </button>
+        
+        <!-- 设置按钮 -->
+        <div class="settings-panel">
+            <button class="settings-btn" id="settings-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4"/>
+                </svg>
+            </button>
+        </div>
     </div>
 
-    <script src="js/main.js?v=2026042400"></script>
+    <script src="js/main.js?v=2026042401"></script>
 </body>
 </html>
