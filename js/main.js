@@ -51,6 +51,14 @@ function loadState() {
     if (saved) {
         const parsed = JSON.parse(saved);
         Object.assign(gameState, parsed);
+        
+        // 验证当前玩具的形态是否存在
+        const skins = toySkins[gameState.currentToy] || [];
+        const skinExists = skins.find(s => s.id === gameState.currentSkin);
+        if (!skinExists) {
+            gameState.currentSkin = skins[0]?.id || 'classic';
+        }
+        
         updateStats();
         if (gameState.darkMode) document.body.classList.add('dark-mode');
     }
@@ -115,6 +123,8 @@ function renderShelfOptions() {
     if (!shelfOptions) return;
     
     const skins = toySkins[gameState.currentToy] || [];
+    console.log('当前玩具:', gameState.currentToy, '形态数量:', skins.length, '形态:', skins);
+    
     shelfOptions.innerHTML = skins.map(skin => `
         <div class="shelf-option ${skin.id === gameState.currentSkin ? 'active' : ''} ${skin.premium ? 'premium' : ''}" 
              data-skin="${skin.id}"
