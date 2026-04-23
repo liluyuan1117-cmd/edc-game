@@ -10,7 +10,12 @@ const gameState = {
     achievements: [],
     currentToy: 'spinner',
     currentSkin: 'classic',
-    soundPack: 'free'
+    soundPack: 'free',
+    toysPlayed: {},
+    dailyCount: 0,
+    loginStreak: 0,
+    lastLogin: null,
+    breatheCycles: 0
 };
 
 // 玩具形态配置 - 全部免费体验
@@ -74,11 +79,42 @@ function loadState() {
             gameState.currentSkin = skins[0]?.id || 'classic';
         }
         
+        // 检查每日登录
+        checkDailyLogin();
+        
         updateStats();
         if (gameState.darkMode) document.body.classList.add('dark-mode');
     }
     // 初始化玩具架
     initToyShelf();
+}
+
+// 检查每日登录
+function checkDailyLogin() {
+    const today = new Date().toDateString();
+    if (gameState.lastLogin !== today) {
+        // 新的一天
+        gameState.dailyCount = 0;
+        
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        if (gameState.lastLogin === yesterday.toDateString()) {
+            // 连续登录
+            gameState.loginStreak = (gameState.loginStreak || 0) + 1;
+        } else {
+            // 中断了
+            gameState.loginStreak = 1;
+        }
+        
+        gameState.lastLogin = today;
+        saveState();
+        
+        // 显示登录奖励
+        if (gameState.loginStreak >= 7) {
+            showAchievement({ id: 'week_streak', name: '周连续', desc: '连续 7 天登录', icon: '📅' });
+        }
+    }
 }
 
 function saveState() {
@@ -225,7 +261,11 @@ const achievements = [
     { id: 'spin_1', name: '旋转开始', desc: '第一次旋转陀螺', icon: '🌀', condition: () => gameState.totalSpins >= 1 },
     { id: 'spin_25', name: '旋转高手', desc: '旋转 25 次陀螺', icon: '💫', condition: () => gameState.totalSpins >= 25 },
     { id: 'spin_100', name: '陀螺大师', desc: '旋转 100 次陀螺', icon: '🏆', condition: () => gameState.totalSpins >= 100 },
-    { id: 'combo_50', name: '专注时刻', desc: '单次会话 50 次', icon: '🔥', condition: () => (gameState.sessionPops + gameState.sessionSpins) >= 50 }
+    { id: 'combo_50', name: '专注时刻', desc: '单次会话 50 次', icon: '🔥', condition: () => (gameState.sessionPops + gameState.sessionSpins) >= 50 },
+    { id: 'all_toys', name: '全玩具制霸', desc: '玩过所有 8 个玩具', icon: '🎮', condition: () => Object.keys(gameState.toysPlayed || {}).length >= 8 },
+    { id: 'daily_100', name: '每日百次', desc: '单日解压 100 次', icon: '💯', condition: () => gameState.dailyCount >= 100 },
+    { id: 'week_streak', name: '周连续', desc: '连续 7 天登录', icon: '📅', condition: () => gameState.loginStreak >= 7 },
+    { id: 'zen_master', name: '禅宗大师', desc: '呼吸石练习 50 次', icon: '🧘', condition: () => gameState.breatheCycles >= 50 }
 ];
 
 function checkAchievements() {
