@@ -1544,5 +1544,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', () => audioContext.init(), { once: true });
 });
 
+// 清除所有缓存并刷新
+function clearAllCache() {
+    localStorage.clear();
+    sessionStorage.clear();
+    alert('✅ 缓存已清除！页面将刷新，捏捏球应该有 6 种形态了！');
+    location.reload();
+}
+
 // 页面关闭前保存
 window.addEventListener('beforeunload', saveState);

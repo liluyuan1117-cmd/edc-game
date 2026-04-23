@@ -1371,6 +1371,33 @@ body {
     text-decoration: underline;
 }
 
+/* ========== 清除缓存按钮 ========== */
+.clear-cache-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s;
+    z-index: 3000;
+}
+
+.clear-cache-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+}
+
+.clear-cache-btn:active {
+    transform: translateY(0);
+}
+
 /* ========== 响应式 ========== */
 @media (max-width: 600px) {
     .header h1 { font-size: 1.6rem; }
