@@ -118,6 +118,22 @@
                 </svg>
                 <span>呼吸石</span>
             </button>
+            <button class="toy-btn" data-toy="flippy">
+                <svg class="toy-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M4 8h16M4 16h16M8 4v16M16 4v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                    <circle cx="16" cy="16" r="2" fill="currentColor"/>
+                </svg>
+                <span>翻转链</span>
+            </button>
+            <button class="toy-btn" data-toy="joystick">
+                <svg class="toy-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                    <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>摇杆</span>
+            </button>
         </nav>
 
         <!-- EDC 玩具架 - 形态选择器 -->
@@ -287,6 +303,36 @@
                 <p class="hint">拇指抚摸凹陷处</p>
                 <div class="slider-counter">
                     <span>呼吸：</span><span id="breathe-cycles">0</span>
+                </div>
+            </div>
+
+            <!-- 翻转链条 -->
+            <div id="flippy" class="toy-container">
+                <div class="flippy-wrapper">
+                    <div class="flippy-chain" id="flippy-chain">
+                        <div class="chain-link"></div>
+                        <div class="chain-link"></div>
+                        <div class="chain-link"></div>
+                        <div class="chain-link"></div>
+                    </div>
+                </div>
+                <p class="hint">点击或甩动链条</p>
+                <div class="slider-counter">
+                    <span>翻转：</span><span id="flippy-flips">0</span>
+                </div>
+            </div>
+
+            <!-- 迷你摇杆 -->
+            <div id="joystick" class="toy-container">
+                <div class="joystick-wrapper">
+                    <div class="mini-joystick" id="mini-joystick">
+                        <div class="joystick-base"></div>
+                        <div class="joystick-stick" id="joystick-stick"></div>
+                    </div>
+                </div>
+                <p class="hint">8 方向推动摇杆</p>
+                <div class="slider-counter">
+                    <span>推动：</span><span id="joystick-moves">0</span>
                 </div>
             </div>
         </main>
