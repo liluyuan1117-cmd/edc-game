@@ -1,0 +1,13 @@
+{
+  "name": "edc-game",
+  "version": "1.0.0",
+  "description": "EDC 解压游戏 - 今天真的压力山大",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static site - no build needed'",
+    "deploy": "vercel --prod"
+  },
+  "keywords": ["edc", "fidget", "game", "stress-relief"],
+  "author": "liluyuan1117-cmd",
+  "license": "MIT"
+}
