@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天真的压力山大 - EDC 解压游戏</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>😤 今天真的压力山大</h1>
+            <p class="subtitle">玩点 EDC 玩具，放松一下～</p>
+        </header>
+
+        <!-- 玩具选择区 -->
+        <nav class="toy-nav">
+            <button class="toy-btn active" data-toy="spinner">🌀 指尖陀螺</button>
+            <button class="toy-btn" data-toy="popit">🔘 按压泡泡</button>
+            <button class="toy-btn" data-toy="keyboard" disabled>⌨️ 机械键盘</button>
+            <button class="toy-btn" data-toy="switch" disabled>🔧 无限开关</button>
+            <button class="toy-btn" data-toy="squishy" disabled>🎱 捏捏乐</button>
+        </nav>
+
+        <!-- 游戏区域 -->
+        <main class="game-area">
+            <!-- 指尖陀螺 -->
+            <div id="spinner" class="toy-container active">
+                <div class="spinner-wrapper">
+                    <div class="spinner" id="fidget-spinner">
+                        <div class="spinner-center"></div>
+                        <div class="spinner-arm arm-1"></div>
+                        <div class="spinner-arm arm-2"></div>
+                        <div class="spinner-arm arm-3"></div>
+                    </div>
+                </div>
+                <p class="hint">点击或滑动旋转陀螺</p>
+            </div>
+
+            <!-- 按压泡泡 -->
+            <div id="popit" class="toy-container">
+                <div class="popit-board" id="popit-board"></div>
+                <p class="hint">点击泡泡，听啵啵声～</p>
+                <button class="reset-btn" id="popit-reset">🔄 重置</button>
+            </div>
+
+            <!-- 其他玩具占位 -->
+            <div id="keyboard" class="toy-container"><p>🚧 开发中...</p></div>
+            <div id="switch" class="toy-container"><p>🚧 开发中...</p></div>
+            <div id="squishy" class="toy-container"><p>🚧 开发中...</p></div>
+        </main>
+
+        <!-- 底部 -->
+        <footer class="footer">
+            <p>MVP 版本 | 更多玩具开发中...</p>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
