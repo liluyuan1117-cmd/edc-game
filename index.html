@@ -49,6 +49,23 @@
             </button>
         </nav>
 
+        <!-- EDC 玩具架 - 形态选择器 -->
+        <div class="toy-shelf" id="toy-shelf">
+            <div class="shelf-label">🏷️ 当前玩具形态</div>
+            <div class="shelf-options" id="shelf-options">
+                <!-- 动态生成 -->
+            </div>
+            <div class="sound-pack-selector">
+                <span class="sound-pack-label">🔊 音效包</span>
+                <select id="sound-pack-select" class="sound-pack-select">
+                    <option value="free">🆓 基础音效包</option>
+                    <option value="asmr" disabled>💎 ASMR 音效包 (即将上线)</option>
+                    <option value="mechanical" disabled>⚙️ 机械轴音效包 (即将上线)</option>
+                    <option value="nature" disabled>🌿 自然音效包 (即将上线)</option>
+                </select>
+            </div>
+        </div>
+
         <!-- 游戏区域 -->
         <main class="game-area">
             <!-- 指尖陀螺 -->
@@ -60,6 +77,9 @@
                             <div class="spinner-arm arm-1"></div>
                             <div class="spinner-arm arm-2"></div>
                             <div class="spinner-arm arm-3"></div>
+                            <div class="spinner-arm arm-4" style="display:none;"></div>
+                            <div class="spinner-arm arm-5" style="display:none;"></div>
+                            <div class="spinner-arm arm-6" style="display:none;"></div>
                             <div class="spinner-weight weight-1"></div>
                             <div class="spinner-weight weight-2"></div>
                             <div class="spinner-weight weight-3"></div>

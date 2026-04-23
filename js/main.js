@@ -7,7 +7,39 @@ const gameState = {
     soundEnabled: true,
     hapticEnabled: true,
     darkMode: false,
-    achievements: []
+    achievements: [],
+    currentToy: 'spinner',
+    currentSkin: 'classic',
+    soundPack: 'free'
+};
+
+// 玩具形态配置
+const toySkins = {
+    spinner: [
+        { id: 'classic', name: '🌀 三叶经典', premium: false },
+        { id: 'star', name: '⭐ 六叶星形', premium: false },
+        { id: 'yin-yang', name: '☯️ 太极阴阳', premium: true }
+    ],
+    popit: [
+        { id: 'rainbow', name: '🌈 彩虹渐变', premium: false },
+        { id: 'mono', name: '⚪ 单色极简', premium: false },
+        { id: 'glow', name: '✨ 夜光模式', premium: true }
+    ],
+    slider: [
+        { id: 'metal', name: '🔩 金属质感', premium: false },
+        { id: 'carbon', name: '⬛ 碳纤维', premium: false },
+        { id: 'gradient', name: '🌸 彩色渐变', premium: true }
+    ],
+    infinity: [
+        { id: 'classic', name: '🎨 经典 6 色', premium: false },
+        { id: 'mono', name: '⚫ 单色高级', premium: false },
+        { id: 'crystal', name: '💎 透明水晶', premium: true }
+    ],
+    squishy: [
+        { id: 'lava', name: '🌋 熔岩流沙', premium: false },
+        { id: 'galaxy', name: '🌌 星空银河', premium: false },
+        { id: 'jelly', name: '🍮 渐变果冻', premium: true }
+    ]
 };
 
 // 从 localStorage 加载
@@ -19,10 +51,109 @@ function loadState() {
         updateStats();
         if (gameState.darkMode) document.body.classList.add('dark-mode');
     }
+    // 初始化玩具架
+    initToyShelf();
 }
 
 function saveState() {
     localStorage.setItem('edcGameState', JSON.stringify(gameState));
+}
+
+// ========== EDC 玩具架 - 形态选择器 ==========
+function initToyShelf() {
+    const shelfOptions = document.getElementById('shelf-options');
+    if (!shelfOptions) return;
+    
+    renderShelfOptions();
+    
+    // 音效包选择器
+    const soundPackSelect = document.getElementById('sound-pack-select');
+    if (soundPackSelect) {
+        soundPackSelect.value = gameState.soundPack || 'free';
+        soundPackSelect.addEventListener('change', (e) => {
+            const selected = e.target.value;
+            if (selected !== 'free') {
+                showPremiumAlert();
+                e.target.value = gameState.soundPack || 'free';
+            } else {
+                gameState.soundPack = selected;
+                saveState();
+            }
+        });
+    }
+}
+
+function renderShelfOptions() {
+    const shelfOptions = document.getElementById('shelf-options');
+    if (!shelfOptions) return;
+    
+    const skins = toySkins[gameState.currentToy] || [];
+    shelfOptions.innerHTML = skins.map(skin => `
+        <div class="shelf-option ${skin.id === gameState.currentSkin ? 'active' : ''} ${skin.premium ? 'premium' : ''}" 
+             data-skin="${skin.id}"
+             onclick="selectSkin('${skin.id}')">
+            ${skin.name}
+        </div>
+    `).join('');
+}
+
+function selectSkin(skinId) {
+    const skins = toySkins[gameState.currentToy] || [];
+    const skin = skins.find(s => s.id === skinId);
+    
+    if (skin && skin.premium) {
+        showPremiumAlert();
+        return;
+    }
+    
+    gameState.currentSkin = skinId;
+    gameState.currentToy = gameState.currentToy; // keep current toy
+    saveState();
+    renderShelfOptions();
+    applySkin();
+}
+
+function applySkin() {
+    // 移除所有形态 class
+    document.querySelectorAll('.spinner').forEach(el => {
+        el.classList.remove('skin-star', 'skin-yin-yang', 'skin-classic');
+    });
+    document.querySelectorAll('.popit-board').forEach(el => {
+        el.classList.remove('skin-mono', 'skin-glow', 'skin-rainbow');
+    });
+    document.querySelectorAll('.slider-track').forEach(el => {
+        el.classList.remove('skin-carbon', 'skin-gradient', 'skin-metal');
+    });
+    document.querySelectorAll('.infinity-cube').forEach(el => {
+        el.classList.remove('skin-mono', 'skin-crystal', 'skin-classic');
+    });
+    document.querySelectorAll('.squishy-ball').forEach(el => {
+        el.classList.remove('skin-galaxy', 'skin-jelly', 'skin-lava');
+    });
+    
+    // 应用当前形态
+    const spinner = document.getElementById('fidget-spinner');
+    if (spinner && gameState.currentToy === 'spinner') {
+        spinner.classList.add(`skin-${gameState.currentSkin}`);
+    }
+}
+
+function showPremiumAlert() {
+    const toast = document.createElement('div');
+    toast.className = 'achievement-toast';
+    toast.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    toast.innerHTML = `
+        <span class="emoji">💎</span>
+        <strong>付费形态</strong><br>
+        <small>高级形态和音效包即将上线！</small>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
 }
 
 // ========== 成就系统 ==========
@@ -177,12 +308,20 @@ function createParticles(x, y, color = '#ff6b6b') {
 
 // ========== 玩具切换 ==========
 function switchToy(toyId) {
+    gameState.currentToy = toyId;
+    gameState.currentSkin = 'classic'; // 重置为默认形态
+    
     document.querySelectorAll('.toy-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.toy === toyId);
     });
     document.querySelectorAll('.toy-container').forEach(c => {
         c.classList.toggle('active', c.id === toyId);
     });
+    
+    // 更新玩具架
+    renderShelfOptions();
+    applySkin();
+    saveState();
 }
 
 document.querySelectorAll('.toy-btn').forEach(btn => {
@@ -671,6 +810,7 @@ document.addEventListener('DOMContentLoaded', () => {
     createPopitBoard();
     createSquishyParticles();
     updateStats();
+    applySkin();
     
     // 首次点击初始化 AudioContext
     document.body.addEventListener('click', () => audioContext.init(), { once: true });
