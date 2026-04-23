@@ -38,11 +38,11 @@
             <button class="toy-btn" data-toy="popit">
                 <span class="emoji">🔘</span>按压泡泡
             </button>
-            <button class="toy-btn" data-toy="slider">
-                <span class="emoji">🔲</span>磁力滑块
+            <button class="toy-btn" data-toy="ratchet">
+                <span class="emoji">🔁</span>棘轮戒指
             </button>
-            <button class="toy-btn" data-toy="infinity">
-                <span class="emoji">🎲</span>无限魔方
+            <button class="toy-btn" data-toy="chain">
+                <span class="emoji">⛓️</span>磁力链
             </button>
             <button class="toy-btn" data-toy="squishy">
                 <span class="emoji">🔮</span>磁力捏捏球
@@ -104,49 +104,40 @@
                 <button class="reset-btn" id="popit-reset">🔄 全部重置</button>
             </div>
 
-            <!-- 磁力滑块 -->
-            <div id="slider" class="toy-container">
-                <div class="slider-wrapper">
-                    <div class="slider-track" id="slider-track">
-                        <div class="slider-plate slider-top" id="slider-top">
-                            <div class="slider-magnets">
-                                <div class="magnet"></div>
-                                <div class="magnet"></div>
-                                <div class="magnet"></div>
-                            </div>
+            <!-- 棘轮戒指 -->
+            <div id="ratchet" class="toy-container">
+                <div class="ratchet-wrapper">
+                    <div class="ratchet-ring" id="ratchet-ring">
+                        <div class="ring-band">
+                            <div class="ring-grooves"></div>
                         </div>
-                        <div class="slider-plate slider-bottom" id="slider-bottom">
-                            <div class="slider-magnets">
-                                <div class="magnet"></div>
-                                <div class="magnet"></div>
-                                <div class="magnet"></div>
-                            </div>
+                        <div class="ring-outer" id="ring-outer">
+                            <div class="pawl"></div>
+                            <div class="pawl"></div>
+                            <div class="pawl"></div>
                         </div>
                     </div>
                 </div>
-                <p class="hint">左右滑动，感受磁力咔嗒声 🔲</p>
+                <div class="ratchet-controls">
+                    <button class="mode-btn active" data-mode="one-way">单向棘轮</button>
+                    <button class="mode-btn" data-mode="two-way">双向棘轮</button>
+                </div>
+                <p class="hint">点击或滑动旋转戒指 🔁</p>
                 <div class="slider-counter">
-                    <span>咔嗒次数：</span><span id="slider-clicks">0</span>
+                    <span>咔嗒次数：</span><span id="ratchet-clicks">0</span>
                 </div>
             </div>
 
-            <!-- 无限魔方 -->
-            <div id="infinity" class="toy-container">
-                <div class="infinity-wrapper">
-                    <div class="infinity-cube" id="infinity-cube">
-                        <div class="mini-cube cube-0"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
-                        <div class="mini-cube cube-1"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
-                        <div class="mini-cube cube-2"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
-                        <div class="mini-cube cube-3"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
-                        <div class="mini-cube cube-4"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
-                        <div class="mini-cube cube-5"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
-                        <div class="mini-cube cube-6"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
-                        <div class="mini-cube cube-7"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+            <!-- 磁力链 -->
+            <div id="chain" class="toy-container">
+                <div class="chain-wrapper">
+                    <div class="fidget-chain" id="fidget-chain">
+                        <div class="chain-segment" id="chain-segments"></div>
                     </div>
                 </div>
-                <p class="hint">点击魔方任意面进行折叠 🎲</p>
+                <p class="hint">点击或甩动链条 ⛓️</p>
                 <div class="slider-counter">
-                    <span>折叠次数：</span><span id="infinity-folds">0</span>
+                    <span>碰撞次数：</span><span id="chain-clacks">0</span>
                 </div>
             </div>
 

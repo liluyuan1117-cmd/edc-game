@@ -25,15 +25,15 @@ const toySkins = {
         { id: 'mono', name: '⚪ 单色极简', premium: false },
         { id: 'glow', name: '✨ 夜光模式', premium: false }
     ],
-    slider: [
-        { id: 'metal', name: '🔩 金属质感', premium: false },
-        { id: 'carbon', name: '⬛ 碳纤维', premium: false },
-        { id: 'gradient', name: '🌸 彩色渐变', premium: false }
+    ratchet: [
+        { id: 'steel', name: '🔩 不锈钢', premium: false },
+        { id: 'titanium', name: '⚫ 钛合金', premium: false },
+        { id: 'gold', name: '🏆 镀金版', premium: false }
     ],
-    infinity: [
-        { id: 'classic', name: '🎨 经典 6 色', premium: false },
-        { id: 'mono', name: '⚫ 单色高级', premium: false },
-        { id: 'crystal', name: '💎 透明水晶', premium: false }
+    chain: [
+        { id: 'silver', name: '⛓️ 银色链', premium: false },
+        { id: 'black', name: '🖤 黑色链', premium: false },
+        { id: 'rainbow', name: '🌈 彩虹链', premium: false }
     ],
     squishy: [
         { id: 'lava', name: '🌋 熔岩流沙', premium: false },

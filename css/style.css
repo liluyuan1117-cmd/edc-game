@@ -1043,6 +1043,174 @@ body {
     height: 260px;
 }
 
+/* ========== 棘轮戒指 ========== */
+.ratchet-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 280px;
+    perspective: 600px;
+}
+
+.ratchet-ring {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    transform-style: preserve-3d;
+}
+
+.ring-band {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #c0c0c0, #e8e8e8, #a0a0a0);
+    box-shadow: 
+        0 8px 16px rgba(0,0,0,0.3),
+        inset 0 2px 4px rgba(255,255,255,0.8),
+        inset 0 -2px 4px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+.ring-grooves {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px dashed rgba(0,0,0,0.2);
+    box-sizing: border-box;
+}
+
+.ring-outer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #667eea, #764ba2);
+    box-shadow: 
+        0 8px 16px rgba(0,0,0,0.3),
+        inset 0 2px 4px rgba(255,255,255,0.3);
+    cursor: grab;
+    z-index: 20;
+    transition: transform 0.05s linear;
+}
+
+.ring-outer:active {
+    cursor: grabbing;
+}
+
+.pawl {
+    position: absolute;
+    width: 12px;
+    height: 20px;
+    background: linear-gradient(145deg, #ffd700, #ffaa00);
+    border-radius: 2px;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.pawl:nth-child(1) { left: 30px; transform: rotate(-15deg); }
+.pawl:nth-child(2) { left: 50%; transform: translateX(-50%); }
+.pawl:nth-child(3) { right: 30px; transform: rotate(15deg); }
+
+.ratchet-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.mode-btn {
+    padding: 8px 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mode-btn.active {
+    background: white;
+    color: #667eea;
+    border-color: white;
+}
+
+/* ========== 磁力链 ========== */
+.chain-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 280px;
+}
+
+.fidget-chain {
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+
+.chain-segment {
+    position: absolute;
+    width: 40px;
+    height: 50px;
+    background: linear-gradient(145deg, #c0c0c0, #888);
+    border-radius: 6px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 
+        0 4px 8px rgba(0,0,0,0.3),
+        inset 0 2px 4px rgba(255,255,255,0.3);
+    cursor: grab;
+    transition: all 0.1s;
+}
+
+.chain-segment:active {
+    cursor: grabbing;
+}
+
+.chain-segment::before,
+.chain-segment::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle, #666, #444);
+    border-radius: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.chain-segment::before {
+    top: 4px;
+}
+
+.chain-segment::after {
+    bottom: 4px;
+}
+
+/* ========== 磁力捏捏球 ========== */
+.squishy-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 260px;
+}
+
 .squishy-ball {
     width: 160px;
     height: 160px;
