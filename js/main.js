@@ -13,32 +13,32 @@ const gameState = {
     soundPack: 'free'
 };
 
-// 玩具形态配置
+// 玩具形态配置 - 全部免费体验
 const toySkins = {
     spinner: [
         { id: 'classic', name: '🌀 三叶经典', premium: false },
         { id: 'star', name: '⭐ 六叶星形', premium: false },
-        { id: 'yin-yang', name: '☯️ 太极阴阳', premium: true }
+        { id: 'yin-yang', name: '☯️ 太极阴阳', premium: false }
     ],
     popit: [
         { id: 'rainbow', name: '🌈 彩虹渐变', premium: false },
         { id: 'mono', name: '⚪ 单色极简', premium: false },
-        { id: 'glow', name: '✨ 夜光模式', premium: true }
+        { id: 'glow', name: '✨ 夜光模式', premium: false }
     ],
     slider: [
         { id: 'metal', name: '🔩 金属质感', premium: false },
         { id: 'carbon', name: '⬛ 碳纤维', premium: false },
-        { id: 'gradient', name: '🌸 彩色渐变', premium: true }
+        { id: 'gradient', name: '🌸 彩色渐变', premium: false }
     ],
     infinity: [
         { id: 'classic', name: '🎨 经典 6 色', premium: false },
         { id: 'mono', name: '⚫ 单色高级', premium: false },
-        { id: 'crystal', name: '💎 透明水晶', premium: true }
+        { id: 'crystal', name: '💎 透明水晶', premium: false }
     ],
     squishy: [
         { id: 'lava', name: '🌋 熔岩流沙', premium: false },
         { id: 'galaxy', name: '🌌 星空银河', premium: false },
-        { id: 'jelly', name: '🍮 渐变果冻', premium: true }
+        { id: 'jelly', name: '🍮 渐变果冻', premium: false }
     ]
 };
 
@@ -71,14 +71,8 @@ function initToyShelf() {
     if (soundPackSelect) {
         soundPackSelect.value = gameState.soundPack || 'free';
         soundPackSelect.addEventListener('change', (e) => {
-            const selected = e.target.value;
-            if (selected !== 'free') {
-                showPremiumAlert();
-                e.target.value = gameState.soundPack || 'free';
-            } else {
-                gameState.soundPack = selected;
-                saveState();
-            }
+            gameState.soundPack = e.target.value;
+            saveState();
         });
     }
 }
@@ -101,13 +95,9 @@ function selectSkin(skinId) {
     const skins = toySkins[gameState.currentToy] || [];
     const skin = skins.find(s => s.id === skinId);
     
-    if (skin && skin.premium) {
-        showPremiumAlert();
-        return;
-    }
+    if (!skin) return;
     
     gameState.currentSkin = skinId;
-    gameState.currentToy = gameState.currentToy; // keep current toy
     saveState();
     renderShelfOptions();
     applySkin();
@@ -132,9 +122,21 @@ function applySkin() {
     });
     
     // 应用当前形态
-    const spinner = document.getElementById('fidget-spinner');
-    if (spinner && gameState.currentToy === 'spinner') {
-        spinner.classList.add(`skin-${gameState.currentSkin}`);
+    if (gameState.currentToy === 'spinner') {
+        const spinner = document.getElementById('fidget-spinner');
+        if (spinner) spinner.classList.add(`skin-${gameState.currentSkin}`);
+    } else if (gameState.currentToy === 'popit') {
+        const board = document.getElementById('popit-board');
+        if (board) board.classList.add(`skin-${gameState.currentSkin}`);
+    } else if (gameState.currentToy === 'slider') {
+        const track = document.getElementById('slider-track');
+        if (track) track.classList.add(`skin-${gameState.currentSkin}`);
+    } else if (gameState.currentToy === 'infinity') {
+        const cube = document.getElementById('infinity-cube');
+        if (cube) cube.classList.add(`skin-${gameState.currentSkin}`);
+    } else if (gameState.currentToy === 'squishy') {
+        const ball = document.getElementById('squishy-ball');
+        if (ball) ball.classList.add(`skin-${gameState.currentSkin}`);
     }
 }
 
@@ -203,7 +205,7 @@ function updateStats() {
     if (sessionEl) sessionEl.textContent = (gameState.sessionPops + gameState.sessionSpins).toLocaleString();
 }
 
-// ========== 音效系统 ==========
+// ========== 音效系统 - 每个玩具独特音效 ==========
 const audioContext = {
     ctx: null,
     init() {
@@ -211,6 +213,27 @@ const audioContext = {
             this.ctx = new (window.AudioContext || window.webkitAudioContext)();
         }
     },
+    
+    // 🌀 指尖陀螺音效 - 轴承旋转声
+    playSpinner(velocity = 1) {
+        if (!gameState.soundEnabled) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        // 根据速度调整音调和音量
+        const baseFreq = 150 + velocity * 50;
+        osc.frequency.setValueAtTime(baseFreq, this.ctx.currentTime);
+        osc.type = gameState.soundPack === 'mechanical' ? 'square' : 'triangle';
+        gain.gain.setValueAtTime(0.08 * velocity, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+        osc.start(this.ctx.currentTime);
+        osc.stop(this.ctx.currentTime + 0.2);
+    },
+    
+    // 🔘 按压泡泡音效 - 啵啵声
     playPop() {
         if (!gameState.soundEnabled) return;
         this.init();
@@ -218,13 +241,24 @@ const audioContext = {
         const gain = this.ctx.createGain();
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-        osc.frequency.setValueAtTime(600 + Math.random() * 200, this.ctx.currentTime);
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+        
+        // ASMR 模式：更丰富的频率
+        if (gameState.soundPack === 'asmr') {
+            osc.frequency.setValueAtTime(400 + Math.random() * 300, this.ctx.currentTime);
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+        } else {
+            osc.frequency.setValueAtTime(600 + Math.random() * 200, this.ctx.currentTime);
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+        }
         osc.start(this.ctx.currentTime);
-        osc.stop(this.ctx.currentTime + 0.1);
+        osc.stop(this.ctx.currentTime + 0.15);
     },
+    
+    // 🔘 重置音效 - 刷刷声
     playReset() {
         if (!gameState.soundEnabled) return;
         this.init();
@@ -239,20 +273,111 @@ const audioContext = {
         osc.start(this.ctx.currentTime);
         osc.stop(this.ctx.currentTime + 0.3);
     },
-    playSpin() {
+    
+    // 🔲 磁力滑块音效 - 磁力咔嗒声
+    playSliderClick() {
+        if (!gameState.soundEnabled) return;
+        this.init();
+        
+        // 机械轴音效包：更像 Cherry 轴
+        if (gameState.soundPack === 'mechanical') {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.frequency.setValueAtTime(1200, this.ctx.currentTime);
+            osc.type = 'square';
+            gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.04);
+            osc.start(this.ctx.currentTime);
+            osc.stop(this.ctx.currentTime + 0.04);
+        } else {
+            // 基础：柔和咔嗒声
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+            osc.type = 'triangle';
+            gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.06);
+            osc.start(this.ctx.currentTime);
+            osc.stop(this.ctx.currentTime + 0.06);
+        }
+    },
+    
+    // 🎲 无限魔方音效 - 折叠咔嗒声
+    playFold() {
         if (!gameState.soundEnabled) return;
         this.init();
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-        osc.frequency.setValueAtTime(200 + Math.random() * 100, this.ctx.currentTime);
-        osc.type = 'triangle';
-        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+        
+        // ASMR 模式：更清脆
+        if (gameState.soundPack === 'asmr') {
+            osc.frequency.setValueAtTime(1000, this.ctx.currentTime);
+            osc.type = 'square';
+            gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+        } else {
+            osc.frequency.setValueAtTime(900, this.ctx.currentTime);
+            osc.type = 'triangle';
+            gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.06);
+        }
         osc.start(this.ctx.currentTime);
-        osc.stop(this.ctx.currentTime + 0.15);
+        osc.stop(this.ctx.currentTime + 0.08);
     },
+    
+    // 🔮 磁力捏捏球音效 - 挤压噗叽声
+    playSquish(squeezeIntensity = 1) {
+        if (!gameState.soundEnabled) return;
+        this.init();
+        
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        // 根据挤压强度调整音效
+        const baseFreq = 180 + squeezeIntensity * 40;
+        osc.frequency.setValueAtTime(baseFreq, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.6, this.ctx.currentTime + 0.2);
+        
+        // ASMR 模式：更湿润的声音
+        if (gameState.soundPack === 'asmr') {
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+        } else {
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+        }
+        osc.start(this.ctx.currentTime);
+        osc.stop(this.ctx.currentTime + 0.25);
+    },
+    
+    // 🔮 捏捏球回弹音效 - 轻微啵声
+    playSquishRelease() {
+        if (!gameState.soundEnabled) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(450, this.ctx.currentTime + 0.1);
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+        osc.start(this.ctx.currentTime);
+        osc.stop(this.ctx.currentTime + 0.1);
+    },
+    
+    // ⚙️ 通用点击音效
     playClick() {
         if (!gameState.soundEnabled) return;
         this.init();
@@ -261,26 +386,11 @@ const audioContext = {
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.frequency.setValueAtTime(1000, this.ctx.currentTime);
-        osc.type = 'square';
+        osc.type = gameState.soundPack === 'mechanical' ? 'square' : 'triangle';
         gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
         osc.start(this.ctx.currentTime);
         osc.stop(this.ctx.currentTime + 0.05);
-    },
-    playSquish() {
-        if (!gameState.soundEnabled) return;
-        this.init();
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.frequency.setValueAtTime(200, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.15);
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-        osc.start(this.ctx.currentTime);
-        osc.stop(this.ctx.currentTime + 0.15);
     }
 };
 
@@ -491,8 +601,8 @@ function addSpinVelocity(velocity) {
         requestAnimationFrame(animateSpinner);
     }
     
-    // 播放音效
-    audioContext.playSpin();
+    // 播放音效（根据速度）
+    audioContext.playSpinner(Math.min(Math.abs(rotationVelocity) / 20, 1.5));
     
     // 触觉反馈
     if (navigator.vibrate && gameState.hapticEnabled) {
@@ -648,7 +758,7 @@ function updateSliderPosition() {
 }
 
 function playSliderClick() {
-    audioContext.playClick();
+    audioContext.playSliderClick();
     sliderClicks++;
     gameState.totalSpins++;
     gameState.sessionSpins++;
@@ -702,7 +812,7 @@ let foldCount = 0;
 let cubeStates = [0, 0, 0, 0, 0, 0, 0, 0];
 
 function playFoldSound() {
-    audioContext.playClick();
+    audioContext.playFold();
     foldCount++;
     gameState.totalSpins++;
     gameState.sessionSpins++;
@@ -747,14 +857,16 @@ const squishyParticles = document.getElementById('squishy-particles');
 const squishySqueezesEl = document.getElementById('squishy-squeezes');
 let squeezeCount = 0;
 let isSqueezing = false;
+let currentDeformation = 0; // 累积变形 0-1
+let deformationDecay = 0.995; // 变形衰减
 
 function createSquishyParticles() {
     if (!squishyParticles) return;
     squishyParticles.innerHTML = '';
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 24; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
-        const angle = (i / 20) * Math.PI * 2;
+        const angle = (i / 24) * Math.PI * 2;
         const radius = 30 + Math.random() * 40;
         particle.style.left = (50 + Math.cos(angle) * radius) + '%';
         particle.style.top = (50 + Math.sin(angle) * radius) + '%';
@@ -762,8 +874,36 @@ function createSquishyParticles() {
         const ty = (Math.random() - 0.5) * 60;
         particle.style.setProperty('--tx', tx + 'px');
         particle.style.setProperty('--ty', ty + 'px');
+        particle.style.transitionDelay = (i * 0.02) + 's';
         squishyParticles.appendChild(particle);
     }
+}
+
+// 捏捏球变形动画
+function updateSquishyDeformation() {
+    if (!squishyBall) return;
+    
+    // 衰减累积变形
+    currentDeformation *= deformationDecay;
+    if (currentDeformation < 0.01) currentDeformation = 0;
+    
+    // 应用变形
+    const baseScale = isSqueezing ? 0.78 : 1 - currentDeformation * 0.15;
+    const translateY = isSqueezing ? 10 : -currentDeformation * 5;
+    squishyBall.style.transform = `scale(${baseScale}) translateY(${translateY}px)`;
+    
+    // 粒子流动效果
+    const particles = squishyParticles?.querySelectorAll('.particle') || [];
+    particles.forEach((p, i) => {
+        const angle = (i / 24) * Math.PI * 2;
+        const spread = isSqueezing ? 1.4 : 1 + currentDeformation * 0.3;
+        const tx = Math.cos(angle) * spread * 50 + (Math.random() - 0.5) * 10;
+        const ty = Math.sin(angle) * spread * 50 + (Math.random() - 0.5) * 10;
+        p.style.setProperty('--tx', tx + 'px');
+        p.style.setProperty('--ty', ty + 'px');
+    });
+    
+    requestAnimationFrame(updateSquishyDeformation);
 }
 
 if (squishyBall) {
@@ -771,10 +911,16 @@ if (squishyBall) {
         e.preventDefault();
         if (isSqueezing) return;
         isSqueezing = true;
-        squishyBall.classList.add('squeezing');
-        audioContext.playSquish();
+        
+        // 累积变形
+        currentDeformation = Math.min(currentDeformation + 0.2, 1);
+        
+        // 根据累积程度播放不同音效
+        const intensity = 0.5 + currentDeformation * 0.5;
+        audioContext.playSquish(intensity);
+        
         if (navigator.vibrate && gameState.hapticEnabled) {
-            navigator.vibrate(30);
+            navigator.vibrate(30 + currentDeformation * 20);
         }
     });
 
@@ -782,7 +928,10 @@ if (squishyBall) {
         e.preventDefault();
         if (!isSqueezing) return;
         isSqueezing = false;
-        squishyBall.classList.remove('squeezing');
+        
+        // 回弹音效
+        setTimeout(() => audioContext.playSquishRelease(), 100);
+        
         squeezeCount++;
         gameState.totalPops++;
         gameState.sessionPops++;
@@ -794,7 +943,7 @@ if (squishyBall) {
     squishyBall.addEventListener('pointerleave', () => {
         if (!isSqueezing) return;
         isSqueezing = false;
-        squishyBall.classList.remove('squeezing');
+        setTimeout(() => audioContext.playSquishRelease(), 100);
         squeezeCount++;
         gameState.totalPops++;
         gameState.sessionPops++;
@@ -802,6 +951,9 @@ if (squishyBall) {
         updateStats();
         checkAchievements();
     });
+    
+    // 启动变形动画循环
+    updateSquishyDeformation();
 }
 
 // ========== 初始化 ==========
