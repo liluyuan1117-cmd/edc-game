@@ -701,7 +701,7 @@ body {
 .spinner.skin-star .arm-4,
 .spinner.skin-star .arm-5,
 .spinner.skin-star .arm-6 {
-    display: block;
+    display: block !important;
 }
 
 .spinner.skin-star .arm-4 { 
@@ -718,6 +718,10 @@ body {
     bottom: 15px; 
     right: 15px; 
     transform: rotate(-60deg); 
+}
+
+.spinner.skin-star .spinner-weight {
+    display: none;
 }
 
 /* ========== 指尖陀螺形态 - 太极阴阳 ========== */

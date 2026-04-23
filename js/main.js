@@ -71,10 +71,40 @@ function initToyShelf() {
     if (soundPackSelect) {
         soundPackSelect.value = gameState.soundPack || 'free';
         soundPackSelect.addEventListener('change', (e) => {
-            gameState.soundPack = e.target.value;
+            const newPack = e.target.value;
+            gameState.soundPack = newPack;
             saveState();
+            
+            // 显示音效包切换提示
+            showSoundPackToast(newPack);
         });
     }
+}
+
+// 音效包切换提示
+function showSoundPackToast(packId) {
+    const packNames = {
+        'free': '🆓 基础音效包',
+        'asmr': '💎 ASMR 音效包',
+        'mechanical': '⚙️ 机械轴音效包',
+        'nature': '🌿 自然音效包'
+    };
+    
+    const toast = document.createElement('div');
+    toast.className = 'achievement-toast';
+    toast.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    toast.innerHTML = `
+        <span class="emoji">🔊</span>
+        <strong>音效包已切换</strong><br>
+        <small>${packNames[packId] || packId}</small>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 2000);
 }
 
 function renderShelfOptions() {
@@ -597,7 +627,8 @@ function createParticles(x, y, color = '#ff6b6b') {
 // ========== 玩具切换 ==========
 function switchToy(toyId) {
     gameState.currentToy = toyId;
-    gameState.currentSkin = 'classic'; // 重置为默认形态
+    // 不重置形态，让每个玩具记住自己的形态
+    // gameState.currentSkin = 'classic';
     
     document.querySelectorAll('.toy-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.toy === toyId);
